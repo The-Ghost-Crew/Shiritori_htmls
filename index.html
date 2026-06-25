@@ -1,19 +1,134 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HTML Testing Hub</title>
+<meta charset="UTF-8">
+<title>Access Portal</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    text-align:center;
+    background:#111;
+    color:white;
+    margin-top:80px;
+}
+
+input{
+    width:420px;
+    max-width:90%;
+    padding:12px;
+    font-size:18px;
+}
+
+button{
+    margin-top:15px;
+    padding:12px 24px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+#error{
+    color:#ff6666;
+    margin-top:20px;
+}
+</style>
 </head>
+
 <body>
-    <h1>HTML Testing Hub</h1>
 
-    <p>Select a test page:</p>
+<h1>Secret Access Portal</h1>
 
-    <ul>
-        <li><a href="fonts-test/">Fonts Test</a></li>
-        <li><a href="buttons-test/">Buttons Test</a></li>
-        <li><a href="colors-test/">Colors Test</a></li>
-        <li><a href="page2/">Page 2</a></li>
-        <li><a href="page3/">Page 3</a></li>
-    </ul>
+<p>Enter your access code.</p>
+
+<input id="codeBox" placeholder="A-XXXXX-XXXXX-XXXXX">
+
+<br>
+
+<button onclick="verifyCode()">Access</button>
+
+<p id="error"></p>
+
+<script>
+
+const DIGITS = "0123456789ABCDEFG";
+
+function fromBase17(str){
+    let n = 0;
+
+    for(const c of str){
+        n *= 17;
+        n += DIGITS.indexOf(c);
+    }
+
+    return n;
+}
+
+function expectedCheck(id,salt){
+
+    return (
+        (id * 37)
+        + (salt * 91)
+        + (id % 13)
+        + (salt % 7)
+    ) % 99999999;
+
+}
+
+function verifyCode(){
+
+    const code = document
+        .getElementById("codeBox")
+        .value
+        .trim()
+        .toUpperCase();
+
+    if(code === "GHOST*"){
+        location.href = "developer.html";
+        return;
+    }
+
+    const parts = code.split("-");
+
+    if(parts.length !== 4){
+        error.innerText = "Invalid format.";
+        return;
+    }
+
+    const page = parts[0];
+
+    if(!["A","B","C"].includes(page)){
+        error.innerText = "Invalid page key.";
+        return;
+    }
+
+    const idNum = fromBase17(parts[1]);
+    const saltNum = fromBase17(parts[2]);
+    const checkNum = fromBase17(parts[3]);
+
+    const shouldBe = expectedCheck(idNum,saltNum);
+
+    if(checkNum !== shouldBe){
+        error.innerText = "Access denied.";
+        return;
+    }
+
+    localStorage.setItem("tester_id",idNum);
+
+    if(page === "A"){
+        location.href = "page-a/";
+    }
+
+    if(page === "B"){
+        location.href = "page-b/";
+    }
+
+    if(page === "C"){
+        location.href = "page-c/";
+    }
+
+}
+
+</script>
+
 </body>
 </html>
