@@ -5,32 +5,53 @@
 <title>Developer Tools</title>
 
 <style>
-body{
-    background:#1d1028;
-    color:white;
-    text-align:center;
-    font-family:Arial;
+body {
+    background: #1d1028;
+    color: white;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin: 30px;
 }
 
-input{
-    width:450px;
-    max-width:90%;
-    padding:12px;
-    font-size:18px;
+input {
+    width: 500px;
+    max-width: 90%;
+    padding: 12px;
+    font-size: 18px;
+    margin-bottom: 15px;
 }
 
-button{
-    margin-top:15px;
-    padding:10px 20px;
-    font-size:18px;
+button {
+    padding: 10px 18px;
+    font-size: 16px;
+    cursor: pointer;
 }
 
-pre{
-    margin-top:30px;
-    background:black;
-    padding:20px;
-    display:inline-block;
-    text-align:left;
+.code-box {
+    margin: 20px auto;
+    width: 90%;
+    max-width: 900px;
+    background: #111;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.code-box h2 {
+    margin-top: 0;
+}
+
+.code-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.code-row input {
+    margin: 0;
+    flex: 1;
+    min-width: 300px;
 }
 </style>
 </head>
@@ -39,93 +60,132 @@ pre{
 
 <h1>Developer Generator</h1>
 
-<p>Enter a Discord ID.</p>
+<p>Enter a Discord ID:</p>
 
-<input id="discordId">
+<input id="discordId" placeholder="123456789012345678">
 
 <br>
 
 <button onclick="generate()">Generate Codes</button>
 
-<pre id="output"></pre>
+<div id="output"></div>
 
 <script>
 
 const DIGITS = "0123456789ABCDEFG";
 
-function toBase17(n){
+function toBase17(n) {
 
-    if(n === 0) return "0";
+    n = BigInt(n);
+
+    if (n === 0n) return "0";
 
     let out = "";
 
-    while(n > 0){
-        out = DIGITS[n % 17] + out;
-        n = Math.floor(n / 17);
+    while (n > 0n) {
+        out = DIGITS[Number(n % 17n)] + out;
+        n /= 17n;
     }
 
     return out;
-
 }
 
-function expectedCheck(id,salt){
+function expectedCheck(id, salt) {
 
     return (
-        (id * 37)
-        + (salt * 91)
-        + (id % 13)
-        + (salt % 7)
-    ) % 99999999;
-
+        (id * 37n) +
+        (salt * 91n) +
+        (id % 13n) +
+        (salt % 7n)
+    ) % 99999999n;
 }
 
-function randomSalt(){
+function timeSalt(pageLetter) {
 
-    return Math.floor(
-        Math.random() * 9999999
+    const currentWindow =
+        BigInt(Math.floor(Date.now() / 900000));
+
+    const pageOffset = BigInt(
+        pageLetter.charCodeAt(0)
     );
 
+    return currentWindow + pageOffset;
 }
 
-function makeCode(page,id){
+function makeCode(page, id) {
 
-    const salt = randomSalt();
+    const salt = timeSalt(page);
 
-    const check = expectedCheck(id,salt);
+    const check = expectedCheck(id, salt);
 
     return (
-        page
-        + "-"
-        + toBase17(id)
-        + "-"
-        + toBase17(salt)
-        + "-"
-        + toBase17(check)
+        page +
+        "-" +
+        toBase17(id) +
+        "-" +
+        toBase17(salt) +
+        "-" +
+        toBase17(check)
     );
-
 }
 
-function generate(){
+function copyCode(id) {
 
-    const id = Number(
-        document.getElementById("discordId").value
-    );
+    const box = document.getElementById(id);
 
-    if(!Number.isInteger(id)){
-        output.innerText = "Invalid Discord ID.";
+    box.select();
+    box.setSelectionRange(0, 99999);
+
+    navigator.clipboard.writeText(box.value);
+}
+
+function createSection(name, code, idName) {
+
+    return `
+        <div class="code-box">
+            <h2>${name}</h2>
+
+            <div class="code-row">
+                <input
+                    id="${idName}"
+                    readonly
+                    value="${code}"
+                    onclick="this.select()"
+                >
+
+                <button onclick="copyCode('${idName}')">
+                    Copy
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function generate() {
+
+    const raw =
+        document.getElementById("discordId")
+        .value
+        .trim();
+
+    if (!/^[0-9]+$/.test(raw)) {
+
+        output.innerHTML =
+            "<p>Invalid Discord ID.</p>";
+
         return;
     }
 
-    output.innerText =
-`PAGE A
-${makeCode("A",id)}
+    const id = BigInt(raw);
 
-PAGE B
-${makeCode("B",id)}
+    const codeA = makeCode("A", id);
+    const codeB = makeCode("B", id);
+    const codeC = makeCode("C", id);
 
-PAGE C
-${makeCode("C",id)}`;
-
+    output.innerHTML =
+        createSection("Page A", codeA, "codeA") +
+        createSection("Page B", codeB, "codeB") +
+        createSection("Page C", codeC, "codeC");
 }
 
 </script>
