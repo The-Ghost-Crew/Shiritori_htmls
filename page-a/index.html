@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page A</title>
+
+<style>
+body{
+    background:#163b16;
+    color:white;
+    text-align:center;
+    font-family:Arial;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Page A</h1>
+
+<p>Congratulations.</p>
+
+<p>This is Green Route.</p>
+
+<p>Tester ID:</p>
+
+<h2 id="id"></h2>
+
+<script>
+id.innerText =
+localStorage.getItem("tester_id") ?? "Unknown";
+</script>
+
+</body>
+</html>
