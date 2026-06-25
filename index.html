@@ -1,102 +1,63 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Access Portal</title>
-
-<style>
-body{
-    font-family:Arial,sans-serif;
-    text-align:center;
-    background:#111;
-    color:white;
-    margin-top:80px;
-}
-
-input{
-    width:420px;
-    max-width:90%;
-    padding:12px;
-    font-size:18px;
-}
-
-button{
-    margin-top:15px;
-    padding:12px 24px;
-    font-size:18px;
-    cursor:pointer;
-}
-
-#error{
-    color:#ff6666;
-    margin-top:20px;
-}
-</style>
-</head>
-
-<body>
-
-<h1>Secret Access Portal</h1>
-
-<p>Enter your access code.</p>
-
-<input id="codeBox" placeholder="A-XXXXX-XXXXX-XXXXX">
-
-<br>
-
-<button onclick="verifyCode()">Access</button>
-
-<p id="error"></p>
-
 <script>
 
 const DIGITS = "0123456789ABCDEFG";
 
-function fromBase17(str){
-    let n = 0;
+function fromBase17(str) {
 
-    for(const c of str){
-        n *= 17;
-        n += DIGITS.indexOf(c);
+    let n = 0n;
+
+    for (const c of str) {
+
+        const digit = DIGITS.indexOf(c);
+
+        if (digit === -1) {
+            return null;
+        }
+
+        n *= 17n;
+        n += BigInt(digit);
     }
 
     return n;
 }
 
-function expectedCheck(id,salt){
+function expectedCheck(id, salt) {
 
     return (
-        (id * 37)
-        + (salt * 91)
-        + (id % 13)
-        + (salt % 7)
-    ) % 99999999;
-
+        (id * 37n) +
+        (salt * 91n) +
+        (id % 13n) +
+        (salt % 7n)
+    ) % 99999999n;
 }
 
-function verifyCode(){
+function verifyCode() {
 
-    const code = document
-        .getElementById("codeBox")
-        .value
-        .trim()
-        .toUpperCase();
+    const code =
+        document
+            .getElementById("codeBox")
+            .value
+            .trim()
+            .toUpperCase();
 
-    if(code === "GHOST*"){
+    if (code === "GHOST*") {
+
         location.href = "developer.html";
         return;
     }
 
     const parts = code.split("-");
 
-    if(parts.length !== 4){
+    if (parts.length !== 4) {
+
         error.innerText = "Invalid format.";
         return;
     }
 
     const page = parts[0];
 
-    if(!["A","B","C"].includes(page)){
+    if (!["A", "B", "C"].includes(page)) {
+
         error.innerText = "Invalid page key.";
         return;
     }
@@ -105,30 +66,41 @@ function verifyCode(){
     const saltNum = fromBase17(parts[2]);
     const checkNum = fromBase17(parts[3]);
 
-    const shouldBe = expectedCheck(idNum,saltNum);
+    if (
+        idNum === null ||
+        saltNum === null ||
+        checkNum === null
+    ) {
 
-    if(checkNum !== shouldBe){
+        error.innerText = "Invalid characters.";
+        return;
+    }
+
+    const shouldBe =
+        expectedCheck(idNum, saltNum);
+
+    if (checkNum !== shouldBe) {
+
         error.innerText = "Access denied.";
         return;
     }
 
-    localStorage.setItem("tester_id",idNum);
+    localStorage.setItem(
+        "tester_id",
+        idNum.toString()
+    );
 
-    if(page === "A"){
+    if (page === "A") {
         location.href = "page-a/";
     }
 
-    if(page === "B"){
+    if (page === "B") {
         location.href = "page-b/";
     }
 
-    if(page === "C"){
+    if (page === "C") {
         location.href = "page-c/";
     }
-
 }
 
 </script>
-
-</body>
-</html>
