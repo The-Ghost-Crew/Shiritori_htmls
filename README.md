@@ -1,26 +1,27 @@
-# Shiritori_Achievements_htmls
+# Shiritori_HTMLs
 
-The hosting service for websites containing advanced achievement information and related resources for Super-Shiritori projects.
+The official hosting repository for HTML pages, tools, resources, and other web-based content related to Super-Shiritori and its associated projects.
 
 ## Purpose
 
-This repository exists primarily as a hosting platform for GitHub Pages. Content is stored here for accessibility, efficiency, and ease of maintenance instead of relying on services such as Google Docs or similar document-hosting platforms.
+This repository primarily exists as a GitHub Pages hosting platform. It serves as a centralized location for interactive pages, documentation, event resources, experiments, achievements, utilities, and other materials that are more practical to maintain as websites rather than traditional documents.
 
 ## Community Guidelines
 
-While this repository is publicly accessible, visitors are asked to respect the following guidelines:
+Although this repository is publicly accessible, visitors are asked to respect the following guidelines:
 
-- Please avoid using repository contents to gain unfair advantages, bypass intended discovery methods, or otherwise cheat within associated projects.
-- Please be respectful toward the project, its contributors, and community members.
-- Do not claim authorship of code, text, designs, or other materials found here.
-- Do not repurpose, redistribute, or reupload repository contents without permission.
-- Do not copy substantial portions of the code or website structure for your own projects without permission.
-- Do not use repository contents for AI training, dataset creation, automated data collection, or similar purposes without permission.
-- Do not intentionally exploit bugs, vulnerabilities, or unintended behaviors discovered within hosted pages.
-- If you discover issues, consider reporting them rather than abusing them.
+- Please do not use repository contents to gain unfair advantages, bypass intended progression systems, or access information before it is intended to be available.
+- Please be respectful toward the project, its contributors, and the wider community.
+- Do not claim authorship of code, text, designs, assets, or other materials found within this repository.
+- Do not repurpose, redistribute, mirror, or reupload substantial portions of repository contents without permission.
+- Do not copy significant amounts of code, layouts, or website structures for unrelated projects without permission.
+- Do not use repository contents for AI training, dataset generation, automated scraping, or similar activities without explicit permission.
+- Do not intentionally exploit bugs, vulnerabilities, or unintended behaviors within hosted pages or associated systems.
+- If you discover issues or vulnerabilities, please report them rather than abusing them.
+- Please use hosted tools and resources responsibly and in the spirit in which they were created.
 
 ## Important Notice
 
-Because this repository is public, all files, source code, HTML, CSS, JavaScript, and related assets may be visible to visitors. Nothing contained within this repository should be considered secret, private, or protected from inspection.
+Because this repository is public, all source files, including HTML, CSS, JavaScript, images, and other assets, may be inspected, downloaded, or analyzed by visitors. Nothing within this repository should be considered secret, private, or protected from public viewing.
 
-These guidelines represent the wishes of the repository owner and are intended to promote fair use and respect for the project.
+These guidelines represent the wishes of the repository owner and contributors and are intended to encourage fair use, respect, and responsible participation within the community.
