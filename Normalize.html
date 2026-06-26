@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Shiritori Normalizer</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+}
+
+textarea {
+    width: 90%;
+    height: 120px;
+    font-size: 16px;
+    padding: 10px;
+}
+
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.box {
+    margin-top: 20px;
+    padding: 15px;
+    background: #1e1e1e;
+    border-radius: 10px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+    white-space: pre-wrap;
+}
+
+.warning {
+    color: #ff6666;
+}
+
+.good {
+    color: #66ff99;
+}
+
+.small {
+    font-size: 12px;
+    opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Shiritori Normalizer</h1>
+
+<textarea id="input" placeholder="Enter text here..."></textarea>
+<br>
+
+<button onclick="normalizeText()">Normalize</button>
+<button onclick="clearOverrides()">Clear Overrides</button>
+
+<div class="box" id="output"></div>
+<div class="box" id="warnings"></div>
+
+<script>
+
+// -------------------- OVERRIDES --------------------
+
+function getOverrides() {
+    return JSON.parse(localStorage.getItem("overrides") || "{}");
+}
+
+function setOverrides(data) {
+    localStorage.setItem("overrides", JSON.stringify(data));
+}
+
+// -------------------- DIACRITICS REMOVAL --------------------
+
+function removeDiacritics(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// -------------------- OVERRIDE CHECK --------------------
+
+function checkOverrides(original) {
+    const overrides = getOverrides();
+    return overrides[original] || null;
+}
+
+// -------------------- NORMALIZATION RULES --------------------
+
+function normalizeWord(word) {
+
+    let warnings = [];
+
+    // exact override
+    const override = checkOverrides(word);
+    if (override) {
+        return { result: override, warnings };
+    }
+
+    let w = removeDiacritics(word);
+
+    // unsupported ^ trigger
+    if (w.includes("^")) {
+        warnings.push("Caret (^) detected. Open Discord discussion required.");
+    }
+
+    // punctuation rules
+    let out = "";
+
+    let i = 0;
+
+    while (i < w.length) {
+
+        let c = w[i];
+
+        // ignore ^^ rule trigger already handled
+
+        // underscores
+        if (c === "_") {
+            let count = 1;
+            while (w[i + count] === "_") count++;
+
+            out += "-".repeat(count);
+            i += count;
+            continue;
+        }
+
+        // tildes
+        if (c === "~") {
+            let count = 1;
+            while (w[i + count] === "~") count++;
+
+            out += "-".repeat(count);
+            i += count;
+            continue;
+        }
+
+        // periods
+        if (c === ".") {
+            let count = 1;
+            while (w[i + count] === ".") count++;
+
+            if (count >= 2) {
+                out += "-";
+            }
+            i += count;
+            continue;
+        }
+
+        // commas
+        if (c === ",") {
+            let count = 1;
+            while (w[i + count] === ",") count++;
+
+            out += "'".repeat(count >= 2 ? 2 : 1);
+            i += count;
+            continue;
+        }
+
+        // colons
+        if (c === ":") {
+            let count = 1;
+            while (w[i + count] === ":") count++;
+
+            if (count >= 3) {
+                out += "colon-colon-colon";
+            } else if (count === 2) {
+                out += "colon-colon";
+            } else {
+                out += "-";
+            }
+
+            i += count;
+            continue;
+        }
+
+        // semicolons
+        if (c === ";") {
+            let count = 1;
+            while (w[i + count] === ";") count++;
+
+            if (count >= 2) {
+                out += "semicolon".repeat(count).replace(/semicolon/g, "semicolon-").slice(0,-1);
+            } else {
+                out += "-";
+            }
+
+            i += count;
+            continue;
+        }
+
+        // slashes
+        if (c === "/") {
+            let count = 1;
+            while (w[i + count] === "/") count++;
+
+            out += "-".repeat(count >= 1 ? 1 : 0);
+            i += count;
+            continue;
+        }
+
+        // plus
+        if (c === "+") {
+            let count = 1;
+            while (w[i + count] === "+") count++;
+
+            out += (i === 0 ? "plus-" : "-plus");
+            i += count;
+            continue;
+        }
+
+        // parentheses / brackets / braces logic
+
+        if (c === "(" || c === "[" || c === "{") {
+
+            let closing = { "(": ")", "[": "]", "{": "}" }[c];
+            let endIndex = w.indexOf(closing, i + 1);
+
+            if (endIndex === -1) {
+                out += (c === "(" ? "parenthesis" :
+                        c === "[" ? "bracket" : "curly-bracket") + "-";
+                i++;
+                continue;
+            }
+
+            i++;
+            continue;
+        }
+
+        if (c === ")" || c === "]" || c === "}") {
+            i++;
+            continue;
+        }
+
+        // normal letters/numbers
+        if (/[a-zA-Z0-9]/.test(c)) {
+            out += c.toLowerCase();
+        }
+
+        i++;
+    }
+
+    // cleanup edges
+    if (out.startsWith("-")) out = out.slice(1);
+    if (out.endsWith("-")) out = out.slice(0, -1);
+
+    if (out.startsWith("-") && out.endsWith("-")) {
+        warnings.push("Invalid word: starts and ends with hyphen after normalization.");
+    }
+
+    return { result: out, warnings };
+}
+
+// -------------------- MAIN --------------------
+
+function normalizeText() {
+
+    const input = document.getElementById("input").value.trim();
+
+    const words = input.split(/\s+/);
+
+    let results = [];
+    let warnings = [];
+
+    for (let w of words) {
+
+        const r = normalizeWord(w);
+
+        results.push(r.result);
+
+        warnings = warnings.concat(r.warnings);
+    }
+
+    document.getElementById("output").innerHTML =
+        "<b>Normalized Output:</b>\n\n" + results.join(" ");
+
+    let warnText = "";
+
+    if (warnings.length > 0) {
+        warnText += "<div class='warning'><b>Warnings:</b>\n\n";
+        warnText += warnings.join("\n\n");
+        warnText += "\n\n</div>";
+    }
+
+    warnText += `
+<div class="small">
+If unsupported characters appear, discuss here:<br>
+https://discord.com/channels/1145887707323699340/1360164828651716660<br><br>
+Or message: no_where.ghost_002
+</div>
+`;
+
+    document.getElementById("warnings").innerHTML = warnText;
+}
+
+// -------------------- OVERRIDES UI (BASIC) --------------------
+
+function clearOverrides() {
+    localStorage.removeItem("overrides");
+    alert("Overrides cleared.");
+}
+
+</script>
+
+</body>
+</html>
