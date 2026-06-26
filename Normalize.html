@@ -5,595 +5,618 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shiritori Normalizer</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:#0c0c0f; --surface:#13131a; --border:#22222e; --border2:#2e2e3e;
-  --text:#dddde8; --muted:#55556a; --accent:#99eebb; --accent2:#6688ff;
-  --warn:#ff7755; --warnsoft:#ffaa55; --bad:#ff4444; --mono:'Courier New',monospace;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0f;--surface:#13131a;--border:#22222e;--border2:#2e2e3e;
+  --text:#dddde8;--muted:#55556a;--accent:#99eebb;--accent2:#6688ff;
+  --warnsoft:#ffaa55;--bad:#ff4444;--mono:'Courier New',monospace;
 }
-body { font-family:var(--mono); background:var(--bg); color:var(--text); min-height:100vh; padding:28px 16px 60px; }
-.wrap { max-width:780px; margin:0 auto; }
-header { margin-bottom:24px; }
-h1 { font-size:1.45rem; color:var(--accent); letter-spacing:.08em; }
-.tagline { font-size:.72rem; color:var(--muted); letter-spacing:.1em; margin-top:3px; }
-textarea {
-  width:100%; height:90px; font-family:var(--mono); font-size:15px;
-  padding:12px 14px; background:var(--surface); color:var(--text);
-  border:1px solid var(--border2); border-radius:6px; resize:vertical; outline:none;
-  transition:border-color .15s;
-}
-textarea:focus { border-color:var(--accent); }
-.meta-row { display:flex; justify-content:space-between; align-items:center; margin-top:5px; font-size:11px; color:var(--muted); }
-.btn-row { display:flex; gap:8px; margin:12px 0; flex-wrap:wrap; }
-button {
-  font-family:var(--mono); font-size:12px; padding:8px 18px; cursor:pointer;
-  background:var(--surface); color:var(--muted); border:1px solid var(--border2);
-  border-radius:5px; transition:all .15s;
-}
-button:hover { color:var(--accent); border-color:var(--accent); background:#0d1f17; }
-button.primary { background:#0d1f17; color:var(--accent); border-color:var(--accent); }
-button.primary:hover { background:#112a1e; }
-.out-block { background:var(--surface); border:1px solid var(--border2); border-radius:8px; overflow:hidden; margin-top:14px; }
-.out-header {
-  font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
-  padding:10px 16px; border-bottom:1px solid var(--border);
-  display:flex; justify-content:space-between; align-items:center;
-}
-.variant-list { padding:4px 0; }
-.variant-row {
-  display:flex; align-items:baseline; gap:12px; padding:8px 16px;
-  border-bottom:1px solid var(--border); transition:background .1s;
-}
-.variant-row:last-child { border-bottom:none; }
-.variant-row:hover { background:#16161f; }
-.v-num { font-size:10px; color:var(--muted); min-width:20px; }
-.v-text { font-size:15px; color:var(--accent); font-weight:bold; letter-spacing:.03em; }
-.v-empty { font-size:13px; color:var(--muted); font-style:italic; }
-.warn-block { margin-top:10px; border-radius:7px; overflow:hidden; border:1px solid; }
-.warn-block.unreg { border-color:#553300; }
-.warn-block.invalid { border-color:#550000; }
-.warn-header { font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:8px 14px; display:flex; align-items:center; gap:7px; }
-.warn-block.unreg .warn-header { background:#1a0f00; color:var(--warnsoft); }
-.warn-block.invalid .warn-header { background:#1a0000; color:var(--bad); }
-.warn-body { padding:12px 14px; font-size:12px; line-height:1.8; }
-.warn-block.unreg .warn-body { background:#130b00; }
-.warn-block.invalid .warn-body { background:#0f0000; }
-.char-tag { display:inline-block; background:#2a1500; border:1px solid #884400; border-radius:3px; padding:1px 7px; font-size:12px; color:#ffaa55; margin:2px 3px; }
-.link { color:var(--accent2); text-decoration:none; }
-.link:hover { text-decoration:underline; }
-.cap-warn { font-size:11px; color:var(--warnsoft); padding:6px 16px 10px; }
-.panel { margin-top:18px; background:var(--surface); border:1px solid var(--border2); border-radius:8px; overflow:hidden; }
-.panel-header { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); padding:10px 16px; border-bottom:1px solid var(--border); cursor:pointer; user-select:none; display:flex; justify-content:space-between; }
-.panel-header:hover { color:var(--text); }
-.panel-body { padding:14px 16px; display:none; }
-.panel-body.open { display:block; }
-.override-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-.override-row input { font-family:var(--mono); font-size:13px; padding:7px 10px; background:#0c0c0f; color:var(--text); border:1px solid var(--border2); border-radius:4px; width:190px; outline:none; }
-.override-row input:focus { border-color:var(--accent); }
-.tag-list { margin-top:12px; min-height:20px; }
-.o-tag { display:inline-flex; align-items:center; gap:5px; background:#0d0d14; border:1px solid var(--border2); border-radius:4px; padding:3px 9px; font-size:11px; color:var(--muted); margin:3px; cursor:pointer; transition:all .12s; }
-.o-tag:hover { border-color:var(--bad); color:var(--bad); }
-.o-tag .arrow { color:var(--accent); }
-.info-card { margin-top:18px; background:#080d18; border:1px solid #223355; border-radius:8px; padding:16px; font-size:12px; line-height:1.9; color:#8899bb; }
-.info-card h3 { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent2); margin-bottom:10px; }
-.abbr-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
-.abbr-tag { background:#0c1420; border:1px solid #334; border-radius:3px; padding:2px 8px; font-size:11px; color:#6688cc; }
+body{font-family:var(--mono);background:var(--bg);color:var(--text);min-height:100vh;padding:28px 16px 60px}
+.wrap{max-width:780px;margin:0 auto}
+h1{font-size:1.45rem;color:var(--accent);letter-spacing:.08em}
+.tagline{font-size:.72rem;color:var(--muted);letter-spacing:.1em;margin-top:3px;margin-bottom:24px}
+textarea{width:100%;height:90px;font-family:var(--mono);font-size:15px;padding:12px 14px;background:var(--surface);color:var(--text);border:1px solid var(--border2);border-radius:6px;resize:vertical;outline:none;transition:border-color .15s}
+textarea:focus{border-color:var(--accent)}
+.meta-row{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:var(--muted)}
+.btn-row{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+button{font-family:var(--mono);font-size:12px;padding:8px 18px;cursor:pointer;background:var(--surface);color:var(--muted);border:1px solid var(--border2);border-radius:5px;transition:all .15s}
+button:hover{color:var(--accent);border-color:var(--accent);background:#0d1f17}
+button.primary{background:#0d1f17;color:var(--accent);border-color:var(--accent)}
+button.primary:hover{background:#112a1e}
+.out-block{background:var(--surface);border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-top:14px}
+.out-header{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:10px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between}
+.variant-list{padding:4px 0}
+.variant-row{display:flex;align-items:baseline;gap:12px;padding:8px 16px;border-bottom:1px solid var(--border);transition:background .1s}
+.variant-row:last-child{border-bottom:none}
+.variant-row:hover{background:#16161f}
+.v-num{font-size:10px;color:var(--muted);min-width:20px}
+.v-text{font-size:15px;color:var(--accent);font-weight:bold;letter-spacing:.03em}
+.v-empty{font-size:13px;color:var(--muted);font-style:italic}
+.warn-block{margin-top:10px;border-radius:7px;overflow:hidden;border:1px solid}
+.warn-block.unreg{border-color:#553300}
+.warn-block.invalid{border-color:#550000}
+.warn-header{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:8px 14px;display:flex;align-items:center;gap:7px}
+.warn-block.unreg .warn-header{background:#1a0f00;color:var(--warnsoft)}
+.warn-block.invalid .warn-header{background:#1a0000;color:var(--bad)}
+.warn-body{padding:12px 14px;font-size:12px;line-height:1.8}
+.warn-block.unreg .warn-body{background:#130b00}
+.warn-block.invalid .warn-body{background:#0f0000}
+.char-tag{display:inline-block;background:#2a1500;border:1px solid #884400;border-radius:3px;padding:1px 7px;font-size:12px;color:#ffaa55;margin:2px 3px}
+.link{color:var(--accent2);text-decoration:none}
+.link:hover{text-decoration:underline}
+.cap-warn{font-size:11px;color:var(--warnsoft);padding:6px 16px 10px}
+.panel{margin-top:18px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;overflow:hidden}
+.panel-header{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;display:flex;justify-content:space-between}
+.panel-header:hover{color:var(--text)}
+.panel-body{padding:14px 16px;display:none}
+.panel-body.open{display:block}
+.override-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.override-row input{font-family:var(--mono);font-size:13px;padding:7px 10px;background:#0c0c0f;color:var(--text);border:1px solid var(--border2);border-radius:4px;width:190px;outline:none}
+.override-row input:focus{border-color:var(--accent)}
+.tag-list{margin-top:12px;min-height:20px}
+.o-tag{display:inline-flex;align-items:center;gap:5px;background:#0d0d14;border:1px solid var(--border2);border-radius:4px;padding:3px 9px;font-size:11px;color:var(--muted);margin:3px;cursor:pointer;transition:all .12s}
+.o-tag:hover{border-color:var(--bad);color:var(--bad)}
+.o-tag .arrow{color:var(--accent)}
+.info-card{margin-top:18px;background:#080d18;border:1px solid #223355;border-radius:8px;padding:16px;font-size:12px;line-height:1.9;color:#8899bb}
+.info-card h3{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent2);margin-bottom:10px}
+.abbr-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.abbr-tag{background:#0c1420;border:1px solid #334;border-radius:3px;padding:2px 8px;font-size:11px;color:#6688cc}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
   <h1>Shiritori Normalizer</h1>
   <div class="tagline">converts words to their spoken hyphenated form</div>
-</header>
-<div class="input-block">
+
   <textarea id="input" placeholder="Enter a word to normalize..."></textarea>
   <div class="meta-row"><span id="charCount"></span><span id="spaceNote"></span></div>
-</div>
-<div class="btn-row">
-  <button class="primary" onclick="run()">Normalize</button>
-  <button onclick="copyAll()">Copy All</button>
-  <button onclick="document.getElementById('input').value='';updateMeta();document.getElementById('mainOut').style.display='none'">Clear</button>
-</div>
-<div id="mainOut" style="display:none">
-  <div class="out-block">
-    <div class="out-header"><span>Normalized Output</span><span id="variantCount"></span></div>
-    <div class="variant-list" id="variantList"></div>
-    <div id="capWarn"></div>
+
+  <div class="btn-row">
+    <button class="primary" onclick="run()">Normalize</button>
+    <button onclick="copyAll()">Copy All</button>
+    <button onclick="clearInput()">Clear</button>
   </div>
-  <div id="warnArea"></div>
-</div>
-<div class="panel">
-  <div class="panel-header" onclick="togglePanel('overPanel')">
-    <span>Overrides</span><span id="overPanelArrow">▶</span>
-  </div>
-  <div class="panel-body" id="overPanel">
-    <div class="override-row">
-      <input id="oKey" placeholder="Word (e.g. 007)" />
-      <input id="oVal" placeholder="Override (e.g. double-o-seven)" />
-      <button onclick="addOverride()">Add</button>
-      <button onclick="clearOverrides()">Clear All</button>
+
+  <div id="mainOut" style="display:none">
+    <div class="out-block">
+      <div class="out-header"><span>Normalized Output</span><span id="variantCount"></span></div>
+      <div class="variant-list" id="variantList"></div>
+      <div id="capWarn"></div>
     </div>
-    <div class="tag-list" id="overList"></div>
+    <div id="warnArea"></div>
   </div>
-</div>
-<div class="info-card">
-  <h3>Suggest a Normalization</h3>
-  If a character produces an unregistered warning, you can request its inclusion:<br>
-  → <a class="link" href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord #normalization-discussion</a><br>
-  → Message <strong>no_where.ghost_002</strong> directly<br><br>
-  <strong style="color:#6688aa">Recognized title abbreviations</strong> (allow a period + space before next word):
-  <div class="abbr-list" id="abbrList"></div>
-</div>
+
+  <div class="panel">
+    <div class="panel-header" onclick="togglePanel()">
+      <span>Overrides</span><span id="panelArrow">▶</span>
+    </div>
+    <div class="panel-body" id="overPanel">
+      <div class="override-row">
+        <input id="oKey" placeholder="Word (e.g. 007)" />
+        <input id="oVal" placeholder="Override (e.g. double-o-seven)" />
+        <button onclick="addOverride()">Add</button>
+        <button onclick="clearOverrides()">Clear All</button>
+      </div>
+      <div class="tag-list" id="overList"></div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h3>Suggest a Normalization</h3>
+    If a character triggers an unregistered warning, request its inclusion:<br>
+    → <a class="link" href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord #normalization-discussion</a><br>
+    → Message <strong>no_where.ghost_002</strong> directly<br><br>
+    <strong style="color:#6688aa">Recognized title abbreviations</strong> (permit period + space before next word):
+    <div class="abbr-list" id="abbrList"></div>
+  </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
-//  CONSTANTS
-// ═══════════════════════════════════════════════════════════
-const TITLE_ABBRS = ["dr","ms","mr","mrs","st","rd","and","mt"];
-const MAX_VARIANTS = 64;
-const PAIRNAME = { "(":"parenthesis", "[":"bracket", "{":"curly-bracket" };
-const CLOSE_TO_OPEN = { ")":"(", "]":"[", "}":"{" };
+// ═══════════════════════════════════════════
+//  IN-MEMORY OVERRIDES (no localStorage)
+// ═══════════════════════════════════════════
+var overrides = {};
 
-// ═══════════════════════════════════════════════════════════
-//  STORAGE
-// ═══════════════════════════════════════════════════════════
-function getOverrides(){ try{ return JSON.parse(localStorage.getItem("sn_overrides")||"{}"); }catch{ return {}; } }
-function saveOverrides(o){ localStorage.setItem("sn_overrides", JSON.stringify(o)); }
-function addOverride(){
-  const k=document.getElementById("oKey").value.trim();
-  const v=document.getElementById("oVal").value.trim();
-  if(!k||!v) return;
-  const o=getOverrides(); o[k]=v; saveOverrides(o);
-  document.getElementById("oKey").value="";
-  document.getElementById("oVal").value="";
+function addOverride() {
+  var k = document.getElementById("oKey").value.trim();
+  var v = document.getElementById("oVal").value.trim();
+  if (!k || !v) return;
+  overrides[k] = v;
+  document.getElementById("oKey").value = "";
+  document.getElementById("oVal").value = "";
   renderOverrides();
 }
-function clearOverrides(){ saveOverrides({}); renderOverrides(); }
-function removeOverride(k){ const o=getOverrides(); delete o[k]; saveOverrides(o); renderOverrides(); }
-function renderOverrides(){
-  const o=getOverrides(); const keys=Object.keys(o);
-  const el=document.getElementById("overList");
-  if(!keys.length){ el.innerHTML="<span style='color:#333;font-size:11px'>No overrides</span>"; return; }
-  el.innerHTML=keys.map(k=>`<span class="o-tag" onclick="removeOverride(${JSON.stringify(k)})" title="Click to remove">${esc(k)} <span class="arrow">→</span> ${esc(o[k])} ✕</span>`).join("");
+function clearOverrides() { overrides = {}; renderOverrides(); }
+function removeOverride(k) { delete overrides[k]; renderOverrides(); }
+function renderOverrides() {
+  var keys = Object.keys(overrides);
+  var el = document.getElementById("overList");
+  if (!keys.length) { el.innerHTML = "<span style='color:#333;font-size:11px'>No overrides</span>"; return; }
+  el.innerHTML = keys.map(function(k) {
+    return '<span class="o-tag" onclick="removeOverride(' + JSON.stringify(k) + ')" title="Click to remove">'
+      + esc(k) + ' <span class="arrow">\u2192</span> ' + esc(overrides[k]) + ' \u2715</span>';
+  }).join("");
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════
+var TITLE_ABBRS = ["dr","ms","mr","mrs","st","rd","and","mt"];
+var MAX_VARIANTS = 64;
+var PAIRNAME = {"(":"parenthesis","[":"bracket","{":"curly-bracket"};
+var CLOSE_TO_OPEN = {")":"(", "]":"[", "}":"{"};
+
+var _ones = ["zero","one","two","three","four","five","six","seven","eight","nine",
+             "ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen",
+             "seventeen","eighteen","nineteen"];
+var _tens = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+
+// ═══════════════════════════════════════════
 //  UTILITIES
-// ═══════════════════════════════════════════════════════════
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+// ═══════════════════════════════════════════
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
 
-function normalizeRaw(s){
-  // Normalize quote variants → plain apostrophe
+function normalizeRaw(s) {
+  // Fancy quotes → plain apostrophe
   s = s.replace(/[\u2018\u2019\u201A\u201B\u0060\u00B4\uFF07]/g, "'");
-  // Normalize dash variants → plain hyphen
+  // Fancy dashes → plain hyphen
   s = s.replace(/[\u2013\u2014\u2015\u2212\uFE58\uFE63\uFF0D]/g, "-");
-  // Strip combining diacritics from a-z base letters only
-  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // Strip combining diacritics
+  s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return s;
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  NUMBER → WORDS
-// ═══════════════════════════════════════════════════════════
-const _ones=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
-const _tens=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-function numToWords(n){
-  if(n===0) return "zero";
-  if(n<20)  return _ones[n];
-  if(n<100) return _tens[Math.floor(n/10)]+(n%10?"-"+_ones[n%10]:"");
-  if(n<1e3) return _ones[Math.floor(n/100)]+"-hundred"+(n%100?"-"+numToWords(n%100):"");
-  if(n<1e6) return numToWords(Math.floor(n/1e3))+"-thousand"+(n%1e3?"-"+numToWords(n%1e3):"");
-  if(n<1e9) return numToWords(Math.floor(n/1e6))+"-million"+(n%1e6?"-"+numToWords(n%1e6):"");
-  if(n<1e12) return numToWords(Math.floor(n/1e9))+"-billion"+(n%1e9?"-"+numToWords(n%1e9):"");
-  if(n<1e15) return numToWords(Math.floor(n/1e12))+"-trillion"+(n%1e12?"-"+numToWords(n%1e12):"");
-  if(n<1e18) return numToWords(Math.floor(n/1e15))+"-quadrillion"+(n%1e15?"-"+numToWords(n%1e15):"");
-  return null;
+// ═══════════════════════════════════════════
+function numToWords(n) {
+  if (n === 0) return "zero";
+  if (n < 20)  return _ones[n];
+  if (n < 100) return _tens[Math.floor(n/10)] + (n%10 ? "-" + _ones[n%10] : "");
+  if (n < 1e3) return _ones[Math.floor(n/100)] + "-hundred" + (n%100 ? "-" + numToWords(n%100) : "");
+  if (n < 1e6) return numToWords(Math.floor(n/1e3)) + "-thousand" + (n%1e3 ? "-" + numToWords(n%1e3) : "");
+  if (n < 1e9) return numToWords(Math.floor(n/1e6)) + "-million" + (n%1e6 ? "-" + numToWords(n%1e6) : "");
+  if (n < 1e12) return numToWords(Math.floor(n/1e9)) + "-billion" + (n%1e9 ? "-" + numToWords(n%1e9) : "");
+  if (n < 1e15) return numToWords(Math.floor(n/1e12)) + "-trillion" + (n%1e12 ? "-" + numToWords(n%1e12) : "");
+  if (n < 1e18) return numToWords(Math.floor(n/1e15)) + "-quadrillion" + (n%1e15 ? "-" + numToWords(n%1e15) : "");
+  return null; // beyond quadrillion
 }
 
-// ═══════════════════════════════════════════════════════════
-//  PRE-PROCESS: space / title abbreviation handling
-// ═══════════════════════════════════════════════════════════
-function preProcess(raw){
-  const spaceCount=(raw.match(/ /g)||[]).length;
-  if(spaceCount===0) return { word:raw, invalid:false };
-  if(spaceCount===1){
-    const idx=raw.indexOf(" ");
-    const left=raw.slice(0,idx).toLowerCase();
-    const right=raw.slice(idx+1);
-    const matchAbbr=TITLE_ABBRS.find(a=>left===a||left===a+".");
-    if(matchAbbr&&right.length>0){
-      const dotted=left.endsWith(".")?left:left+".";
-      return { word:dotted+right, invalid:false };
+// ═══════════════════════════════════════════
+//  PRE-PROCESS (spaces / title abbrs)
+// ═══════════════════════════════════════════
+function preProcess(raw) {
+  var spaces = (raw.match(/ /g) || []).length;
+  if (spaces === 0) return { word: raw, invalid: false };
+  if (spaces === 1) {
+    var idx = raw.indexOf(" ");
+    var left = raw.slice(0, idx).toLowerCase();
+    var right = raw.slice(idx + 1);
+    var match = TITLE_ABBRS.filter(function(a){ return left === a || left === a + "."; })[0];
+    if (match && right.length > 0) {
+      var dotted = left.endsWith(".") ? left : left + ".";
+      return { word: dotted + right, invalid: false };
     }
-    return { word:raw, invalid:true, invalidReason:"Input contains a space not preceded by a recognized title abbreviation. Words must be single tokens." };
+    return { word: raw, invalid: true,
+      invalidReason: "Input contains a space not preceded by a recognized title abbreviation. Words must be single tokens." };
   }
-  return { word:raw, invalid:true, invalidReason:"Input contains multiple spaces. Only one space is allowed (with a title abbreviation prefix)." };
+  return { word: raw, invalid: true,
+    invalidReason: "Input contains multiple spaces. Only one space is allowed (with a title abbreviation prefix)." };
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  TOKENIZER
-// ═══════════════════════════════════════════════════════════
-function tokenize(s){
-  const tokens=[];
-  let i=0;
-  while(i<s.length){
-    const c=s[i];
-    if(/[a-zA-Z]/.test(c)){ tokens.push({type:"letter",val:c.toLowerCase()}); i++; continue; }
-    if(/[0-9]/.test(c)){
-      let run="";
-      while(i<s.length&&/[0-9]/.test(s[i])){ run+=s[i]; i++; }
-      tokens.push({type:"digits",val:run}); continue;
+// ═══════════════════════════════════════════
+function tokenize(s) {
+  var tokens = [];
+  var i = 0;
+  while (i < s.length) {
+    var c = s[i];
+    if (/[a-zA-Z]/.test(c)) { tokens.push({type:"letter", val:c.toLowerCase()}); i++; continue; }
+    if (/[0-9]/.test(c)) {
+      var run = "";
+      while (i < s.length && /[0-9]/.test(s[i])) { run += s[i]; i++; }
+      tokens.push({type:"digits", val:run}); continue;
     }
-    if("([{".includes(c)){ tokens.push({type:"open",char:c}); i++; continue; }
-    if(")]}".includes(c)){ tokens.push({type:"close",char:c}); i++; continue; }
-    // Runs of same punct char
-    {
-      let run=c; let j=i+1;
-      while(j<s.length&&s[j]===c){ run+=s[j]; j++; }
-      tokens.push({type:"punct",char:c,count:run.length});
-      i=j; continue;
-    }
+    if ("([{".indexOf(c) >= 0) { tokens.push({type:"open", char:c}); i++; continue; }
+    if (")]}".indexOf(c) >= 0) { tokens.push({type:"close", char:c}); i++; continue; }
+    // Run of same char
+    var run2 = c; var j = i + 1;
+    while (j < s.length && s[j] === c) { run2 += s[j]; j++; }
+    tokens.push({type:"punct", char:c, count:run2.length});
+    i = j;
   }
   return tokens;
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  PAREN PAIRING
-// ═══════════════════════════════════════════════════════════
-function annotateParens(tokens){
-  tokens.forEach(t=>{ if(t.type==="open"||t.type==="close") t.paired=false; });
-  const stacks={"(":[],  "[":[],  "{":[]);
-  tokens.forEach((t,i)=>{
-    if(t.type==="open"){
+// ═══════════════════════════════════════════
+function annotateParens(tokens) {
+  var stacks = {"(":[],  "[":[],  "{":[]} ;
+  for (var i = 0; i < tokens.length; i++) {
+    var t = tokens[i];
+    if (t.type === "open" || t.type === "close") t.paired = false;
+    if (t.type === "open") {
       stacks[t.char].push(i);
-    } else if(t.type==="close"){
-      const oc=CLOSE_TO_OPEN[t.char];
-      if(oc&&stacks[oc].length>0){
-        const oi=stacks[oc].pop();
-        tokens[oi].paired=true; tokens[oi].closeIdx=i;
-        t.paired=true; t.openIdx=oi;
+    } else if (t.type === "close") {
+      var oc = CLOSE_TO_OPEN[t.char];
+      if (oc && stacks[oc].length > 0) {
+        var oi = stacks[oc].pop();
+        tokens[oi].paired = true; tokens[oi].closeIdx = i;
+        t.paired = true; t.openIdx = oi;
       }
     }
-  });
+  }
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  SLOT BUILDER
-//  Node kinds used in assembly:
-//    { k:"lit",  v }   — literal a-z text
-//    { k:"word", v }   — word/phrase that auto-gets hyphens around it
-//    { k:"hyph" }      — explicit hyphen (non-merging)
-//    { k:"slash" }     — merging hyphen (adjacent hyphens +1)
-//    { k:"apos", v }   — apostrophe (eats preceding generated hyphen)
-//    { k:"unreg", v }  — unregistered char (stripped from output)
-// ═══════════════════════════════════════════════════════════
-function buildSlots(tokens){
-  const n=tokens.length;
-  const unregs=new Set();
-  const slots=[];
-  let i=0;
-  while(i<n){
-    const t=tokens[i];
-    const atStart=(i===0);
-    const atEnd=(i===n-1);
+//  Node kinds: lit, word, hyph, slash, apos, unreg
+// ═══════════════════════════════════════════
+function buildSlots(tokens) {
+  var n = tokens.length;
+  var unregs = {};
+  var slots = [];
+  var i = 0;
 
-    // ── Letter ──
-    if(t.type==="letter"){
-      slots.push([[{k:"lit",v:t.val}]]);
+  while (i < n) {
+    var t = tokens[i];
+    var atStart = (i === 0);
+    var atEnd   = (i === n - 1);
+
+    if (t.type === "letter") {
+      slots.push([[{k:"lit", v:t.val}]]);
       i++; continue;
     }
 
-    // ── Digits ──
-    if(t.type==="digits"){
-      const num=parseInt(t.val,10);
-      const words=numToWords(num);
-      if(words===null){
-        unregs.add(t.val+"(beyond quadrillion)");
-        slots.push([[{k:"unreg",v:t.val}]]);
-      } else {
-        slots.push([[{k:"word",v:words}]]);
+    if (t.type === "digits") {
+      // Each digit converted individually: 007 -> zero-zero-seven, A3B -> a-three-b
+      for (var di = 0; di < t.val.length; di++) {
+        var dnum = parseInt(t.val[di], 10);
+        slots.push([[{k:"word", v:_ones[dnum]}]]);
       }
       i++; continue;
     }
 
-    // ── Open paren ──
-    if(t.type==="open"){
-      const name=PAIRNAME[t.char];
-      if(atStart){
-        // Any count at start: ignored whether paired or not
-        slots.push([[{k:"lit",v:""}]]);
-      } else if(t.paired){
+    if (t.type === "open") {
+      var name = PAIRNAME[t.char];
+      // "at start" means all preceding tokens are also open parens (word hasn't begun)
+      var allOpenSoFar = true;
+      for (var pi3 = 0; pi3 < i; pi3++) {
+        if (tokens[pi3].type !== "open") { allOpenSoFar = false; break; }
+      }
+      if (allOpenSoFar) {
+        slots.push([[{k:"lit", v:""}]]);
+      } else if (t.paired) {
         slots.push([[{k:"hyph"}]]);
       } else {
-        slots.push([[{k:"word",v:name}]]);
+        slots.push([[{k:"word", v:name}]]);
       }
       i++; continue;
     }
 
-    // ── Close paren ──
-    if(t.type==="close"){
-      const oc=CLOSE_TO_OPEN[t.char];
-      const name=PAIRNAME[oc||"("];
-      if(atEnd){
-        // Any count at end: ignored whether paired or not
-        slots.push([[{k:"lit",v:""}]]);
-      } else if(t.paired){
+    if (t.type === "close") {
+      var oc2 = CLOSE_TO_OPEN[t.char];
+      var name2 = PAIRNAME[oc2 || "("];
+      if (atEnd) {
+        slots.push([[{k:"lit", v:""}]]);
+      } else if (t.paired) {
         slots.push([[{k:"hyph"}]]);
       } else {
-        slots.push([[{k:"word",v:name}]]);
+        slots.push([[{k:"word", v:name2}]]);
       }
       i++; continue;
     }
 
-    // ── Punctuation ──
-    if(t.type==="punct"){
-      const {char:c,count}=t;
+    if (t.type === "punct") {
+      var c = t.char;
+      var count = t.count;
 
-      // Helper to push a single-option slot
-      const push1=nodes=>{ slots.push([nodes]); };
-      // Helper to push multi-option slot
-      const pushN=(...alts)=>{ slots.push(alts); };
+      function push1(nodes) { slots.push([nodes]); }
+      function pushN() { slots.push(Array.prototype.slice.call(arguments)); }
 
-      switch(c){
-        // Hyphen (literal dash in input) — treated as HYPH
+      switch (c) {
         case "-":
-          if(atStart||atEnd){ push1([]); break; }
-          push1(Array(count).fill(null).map(()=>({k:"hyph"}))); break;
+          if (atStart || atEnd) { push1([]); break; }
+          var hArr = [];
+          for (var h = 0; h < count; h++) hArr.push({k:"hyph"});
+          push1(hArr); break;
 
-        // Slash / backslash — merging hyphen, ignored at start
         case "/": case "\\":
-          if(atStart){ push1([]); break; }
-          // Any run of / or \ = 1 slash node (merging handles count)
+          if (atStart) { push1([]); break; }
           push1([{k:"slash"}]); break;
 
-        // Tilde / underscore — always 1 hyph, no merging, ignore at start/end
         case "~": case "_":
-          if(atStart||atEnd){ push1([]); break; }
+          if (atStart || atEnd) { push1([]); break; }
           push1([{k:"hyph"}]); break;
 
-        // Period — any count = 1 hyph, ignore at start/end
         case ".":
-          if(atStart||atEnd){ push1([]); break; }
+          if (atStart || atEnd) { push1([]); break; }
           push1([{k:"hyph"}]); break;
 
-        // Comma — any count = 1 hyph, ignore at start/end
         case ",":
-          if(atStart||atEnd){ push1([]); break; }
+          if (atStart || atEnd) { push1([]); break; }
           push1([{k:"hyph"}]); break;
 
-        // Apostrophe — literal, eats preceding generated hyph in assembly
         case "'":
-          push1([{k:"apos",v:"'".repeat(count)}]); break;
+          push1([{k:"apos", v:"'".repeat(count)}]); break;
 
-        // Colon
         case ":":
-          if(atStart||atEnd){ push1([]); break; }
-          if(count===1){ push1([{k:"hyph"}]); break; }
-          push1([{k:"word",v:Array(count).fill("colon").join("-")}]); break;
+          if (atStart || atEnd) { push1([]); break; }
+          if (count === 1) { push1([{k:"hyph"}]); break; }
+          var colonStr = [];
+          for (var ci = 0; ci < count; ci++) colonStr.push("colon");
+          push1([{k:"word", v:colonStr.join("-")}]); break;
 
-        // Semicolon — 2 variants for count>=2
         case ";":
-          if(atStart||atEnd){ push1([]); break; }
-          if(count===1){ push1([{k:"hyph"}]); break; }
-          {
-            const a=Array(count).fill("semicolon").join("-");
-            const b=Array(count).fill("semi-colon").join("-");
-            pushN([{k:"word",v:a}],[{k:"word",v:b}]);
-          }
-          break;
+          if (atStart || atEnd) { push1([]); break; }
+          if (count === 1) { push1([{k:"hyph"}]); break; }
+          var scA = []; var scB = [];
+          for (var si = 0; si < count; si++) { scA.push("semicolon"); scB.push("semi-colon"); }
+          pushN([{k:"word", v:scA.join("-")}], [{k:"word", v:scB.join("-")}]); break;
 
-        // Plus — each + is its own "plus"
         case "+":
-          {
-            // Build: plus (- plus)* 
-            // This goes through assembly as a word node so it gets hyphens
-            const seg=Array(count).fill("plus").join("-");
-            push1([{k:"word",v:seg}]);
-          }
-          break;
+          var plusArr = [];
+          for (var pi2 = 0; pi2 < count; pi2++) plusArr.push("plus");
+          push1([{k:"word", v:plusArr.join("-")}]); break;
 
-        // Exclamation — 3 variants
         case "!":
-          pushN(
-            [{k:"word",v:"exclamation-mark"}],
-            [{k:"word",v:"exclamation-point"}],
-            []
-          ); break;
+          pushN([{k:"word",v:"exclamation-mark"}], [{k:"word",v:"exclamation-point"}], []); break;
 
-        // Question — 2 variants
         case "?":
-          pushN(
-            [{k:"word",v:"question-mark"}],
-            []
-          ); break;
+          pushN([{k:"word",v:"question-mark"}], []); break;
 
-        // Backtick — normalized to apostrophe already upstream,
-        // but catch any that slip through
         case "`":
-          push1([{k:"apos",v:"'"}]); break;
+          push1([{k:"apos", v:"'"}]); break;
 
         default:
-          unregs.add(c);
-          push1([{k:"unreg",v:c}]); break;
+          unregs[c] = true;
+          push1([{k:"unreg", v:c}]); break;
       }
       i++; continue;
     }
 
-    // Fallback
-    unregs.add(String(tokens[i].char||tokens[i].val||"?"));
-    slots.push([[{k:"unreg",v:"?"}]]);
+    // fallback
+    unregs["?"] = true;
+    slots.push([[{k:"unreg", v:"?"}]]);
     i++;
   }
 
-  return {slots, unregs};
+  return { slots: slots, unregs: unregs };
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  CARTESIAN PRODUCT
-// ═══════════════════════════════════════════════════════════
-function cartesian(slots){
-  let acc=[[]]; let capped=false;
-  for(const slot of slots){
-    const next=[];
-    for(const cur of acc){
-      for(const alt of slot){
-        next.push([...cur,...alt]);
-        if(next.length>=MAX_VARIANTS){ return {res:next,capped:true}; }
+// ═══════════════════════════════════════════
+function cartesian(slots) {
+  var acc = [[]];
+  var capped = false;
+  for (var si = 0; si < slots.length; si++) {
+    var slot = slots[si];
+    var next = [];
+    for (var ai = 0; ai < acc.length; ai++) {
+      for (var oi = 0; oi < slot.length; oi++) {
+        next.push(acc[ai].concat(slot[oi]));
+        if (next.length >= MAX_VARIANTS) { return { res: next, capped: true }; }
       }
     }
-    acc=next;
+    acc = next;
   }
-  return {res:acc,capped:false};
+  return { res: acc, capped: false };
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  ASSEMBLY
-// ═══════════════════════════════════════════════════════════
-function assembleClean(nodes){
-  // 1. Filter unreg and empty lits
-  const filtered=nodes.filter(nd=>nd.k!=="unreg"&&!(nd.k==="lit"&&nd.v===""));
-  if(!filtered.length) return "";
+//  B = collapsible word-border hyph
+//  H = real explicit hyphen (stacks)
+//  S = slash (merging: adds 1 to adjacent real hyphens)
+// ═══════════════════════════════════════════
+function assembleClean(nodes) {
+  // Filter out unreg and empty lits
+  var filtered = nodes.filter(function(nd) {
+    return nd.k !== "unreg" && !(nd.k === "lit" && nd.v === "");
+  });
+  if (!filtered.length) return "";
 
-  // 2. Expand word nodes with border hyphens (B = collapsible border, H = real, S = slash)
-  const expanded=[];
-  for(const nd of filtered){
-    if(nd.k==="word"){
+  // Expand word nodes with collapsible border markers
+  var expanded = [];
+  for (var i = 0; i < filtered.length; i++) {
+    var nd = filtered[i];
+    if (nd.k === "word") {
       expanded.push({k:"B"});
-      nd.v.split("-").forEach((part,pi,arr)=>{
-        if(part) expanded.push({k:"L",v:part});
-        if(pi<arr.length-1) expanded.push({k:"H"});
-      });
+      var parts = nd.v.split("-");
+      for (var pi = 0; pi < parts.length; pi++) {
+        if (parts[pi]) expanded.push({k:"L", v:parts[pi]});
+        if (pi < parts.length - 1) expanded.push({k:"H"});
+      }
       expanded.push({k:"B"});
-    } else if(nd.k==="lit")  { if(nd.v) expanded.push({k:"L",v:nd.v}); }
-    else if(nd.k==="apos")   { expanded.push({k:"A",v:nd.v}); }
-    else if(nd.k==="hyph")   { expanded.push({k:"H"}); }
-    else if(nd.k==="slash")  { expanded.push({k:"S"}); }
+    } else if (nd.k === "lit")  { if (nd.v) expanded.push({k:"L", v:nd.v}); }
+    else if (nd.k === "apos")   { expanded.push({k:"A", v:nd.v}); }
+    else if (nd.k === "hyph")   { expanded.push({k:"H"}); }
+    else if (nd.k === "slash")  { expanded.push({k:"S"}); }
   }
 
-  // 3. Merge runs of B/H/S
-  //   only-B run       → 1 (word separator, collapsible)
-  //   only-S run (±B)  → 1 (slash alone = 1 hyphen)
-  //   H present        → count(H) + (any S ? 1 : 0)  [B ignored in count]
-  const merged=[];
-  let ei=0;
-  while(ei<expanded.length){
-    const e=expanded[ei];
-    if(e.k==="B"||e.k==="H"||e.k==="S"){
-      let bc=0,hc=0,sc=0;
-      while(ei<expanded.length&&(expanded[ei].k==="B"||expanded[ei].k==="H"||expanded[ei].k==="S")){
-        if(expanded[ei].k==="B") bc++;
-        else if(expanded[ei].k==="H") hc++;
+  // Merge runs of B/H/S
+  // only-B (or only-S with B): → 1
+  // H present: count(H) + (any S ? 1 : 0), B ignored
+  var merged = [];
+  var ei = 0;
+  while (ei < expanded.length) {
+    var e = expanded[ei];
+    if (e.k === "B" || e.k === "H" || e.k === "S") {
+      var bc = 0, hc = 0, sc = 0;
+      while (ei < expanded.length && (expanded[ei].k === "B" || expanded[ei].k === "H" || expanded[ei].k === "S")) {
+        if (expanded[ei].k === "B") bc++;
+        else if (expanded[ei].k === "H") hc++;
         else sc++;
         ei++;
       }
-      const count=(hc===0)?1:hc+(sc>0?1:0);
-      merged.push({k:"H",count});
-    } else { merged.push(e); ei++; }
+      var count2 = (hc === 0) ? 1 : hc + (sc > 0 ? 1 : 0);
+      merged.push({k:"H", count:count2});
+    } else {
+      merged.push(e);
+      ei++;
+    }
   }
 
-  // 4. Stringify
-  let out="";
-  for(const m of merged){
-    if(m.k==="L") out+=m.v;
-    else if(m.k==="A") out+=m.v;
-    else if(m.k==="H") out+="-".repeat(m.count);
+  // Stringify
+  var out = "";
+  for (var mi = 0; mi < merged.length; mi++) {
+    var m = merged[mi];
+    if (m.k === "L" || m.k === "A") out += m.v;
+    else if (m.k === "H") { for (var hi = 0; hi < m.count; hi++) out += "-"; }
   }
 
-  // 5. Apostrophe eats preceding hyphen(s)
-  out=out.replace(/-+(')/g,"$1");
+  // Apostrophe eats preceding hyphen(s)
+  out = out.replace(/-+(')/g, "$1");
 
-  // 6. Strip leading/trailing hyphens
-  out=out.replace(/^-+|-+$/g,"");
+  // Strip leading/trailing hyphens
+  out = out.replace(/^-+|-+$/g, "");
 
   return out;
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  MAIN NORMALIZER
-// ═══════════════════════════════════════════════════════════
-function normalizeWord(raw){
-  const overrides=getOverrides();
-  if(overrides[raw]) return {variants:[overrides[raw]],unregs:new Set(),capped:false,overridden:true};
+// ═══════════════════════════════════════════
+function normalizeWord(raw) {
+  if (overrides[raw]) {
+    return { variants:[overrides[raw]], unregs:{}, capped:false, overridden:true };
+  }
 
-  const pre=preProcess(raw);
-  if(pre.invalid) return {variants:[],unregs:new Set(),capped:false,invalid:true,invalidReason:pre.invalidReason};
+  var pre = preProcess(raw);
+  if (pre.invalid) {
+    return { variants:[], unregs:{}, capped:false, invalid:true, invalidReason:pre.invalidReason };
+  }
 
-  const s=normalizeRaw(pre.word);
-  const tokens=tokenize(s);
+  var s = normalizeRaw(pre.word);
+  var tokens = tokenize(s);
   annotateParens(tokens);
-  const {slots,unregs}=buildSlots(tokens);
-  const {res:combos,capped}=cartesian(slots);
+  var built = buildSlots(tokens);
+  var cp = cartesian(built.slots);
 
-  const seen=new Set();
-  const variants=[];
-  for(const combo of combos){
-    const v=assembleClean(combo);
-    if(!seen.has(v)){ seen.add(v); if(v.length>0) variants.push(v); }
+  var seen = {};
+  var variants = [];
+  for (var i = 0; i < cp.res.length; i++) {
+    var v = assembleClean(cp.res[i]);
+    if (!seen[v]) {
+      seen[v] = true;
+      if (v.length > 0) variants.push(v);
+    }
   }
 
-  return {variants:variants.length?variants:[""],unregs,capped,invalid:false};
+  return {
+    variants: variants.length ? variants : [""],
+    unregs: built.unregs,
+    capped: cp.capped,
+    invalid: false
+  };
 }
 
-// ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  UI
-// ═══════════════════════════════════════════════════════════
-function run(){
-  const raw=document.getElementById("input").value;
-  if(!raw.trim()) return;
-  const result=normalizeWord(raw);
-  document.getElementById("mainOut").style.display="block";
-  const vl=document.getElementById("variantList");
-  const vc=document.getElementById("variantCount");
-  const cw=document.getElementById("capWarn");
+// ═══════════════════════════════════════════
+function run() {
+  var raw = document.getElementById("input").value;
+  if (!raw.trim()) return;
+  var result = normalizeWord(raw);
+  document.getElementById("mainOut").style.display = "block";
+  var vl = document.getElementById("variantList");
+  var vc = document.getElementById("variantCount");
+  var cw = document.getElementById("capWarn");
 
-  if(result.invalid){
-    vl.innerHTML=`<div class="variant-row"><span class="v-empty">Invalid — see warning below</span></div>`;
-    vc.textContent=""; cw.innerHTML="";
-  } else if(result.overridden){
-    vl.innerHTML=`<div class="variant-row"><span class="v-num">1.</span><span class="v-text">${esc(result.variants[0])}</span><span style="font-size:10px;color:var(--muted);margin-left:8px">[override]</span></div>`;
-    vc.textContent="1 variant"; cw.innerHTML="";
+  if (result.invalid) {
+    vl.innerHTML = '<div class="variant-row"><span class="v-empty">Invalid \u2014 see warning below</span></div>';
+    vc.textContent = ""; cw.innerHTML = "";
+  } else if (result.overridden) {
+    vl.innerHTML = '<div class="variant-row"><span class="v-num">1.</span><span class="v-text">'
+      + esc(result.variants[0]) + '</span><span style="font-size:10px;color:var(--muted);margin-left:8px">[override]</span></div>';
+    vc.textContent = "1 variant"; cw.innerHTML = "";
   } else {
-    vl.innerHTML=result.variants.map((v,i)=>`<div class="variant-row"><span class="v-num">${i+1}.</span><span class="v-text">${esc(v)}</span></div>`).join("");
-    vc.textContent=result.variants.length+" variant"+(result.variants.length!==1?"s":"");
-    cw.innerHTML=result.capped?`<div class="cap-warn">⚠ Capped at ${MAX_VARIANTS} variants.</div>`:"";
+    vl.innerHTML = result.variants.map(function(v, i) {
+      return '<div class="variant-row"><span class="v-num">' + (i+1) + '.</span><span class="v-text">' + esc(v) + '</span></div>';
+    }).join("");
+    vc.textContent = result.variants.length + " variant" + (result.variants.length !== 1 ? "s" : "");
+    cw.innerHTML = result.capped
+      ? '<div class="cap-warn">\u26a0 Capped at ' + MAX_VARIANTS + ' variants.</div>'
+      : "";
   }
 
-  const wa=document.getElementById("warnArea");
-  let warnHtml="";
-  if(result.invalid){
-    warnHtml+=`<div class="warn-block invalid"><div class="warn-header">⚠ Invalid Input</div><div class="warn-body">${esc(result.invalidReason)}<br><br>If you believe this is wrong:<br><a class="link" href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord #normalization-discussion</a> or message <strong>no_where.ghost_002</strong></div></div>`;
+  var wa = document.getElementById("warnArea");
+  var warnHtml = "";
+
+  if (result.invalid) {
+    warnHtml += '<div class="warn-block invalid"><div class="warn-header">\u26a0 Invalid Input</div>'
+      + '<div class="warn-body">' + esc(result.invalidReason)
+      + '<br><br>If you believe this is wrong:<br>'
+      + '<a class="link" href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord #normalization-discussion</a>'
+      + ' or message <strong>no_where.ghost_002</strong></div></div>';
   }
-  if(result.unregs&&result.unregs.size>0){
-    const chars=[...result.unregs].map(c=>`<span class="char-tag">${esc(c)}</span>`).join(" ");
-    warnHtml+=`<div class="warn-block unreg"><div class="warn-header">⚠ Unregistered Characters</div><div class="warn-body">The following characters have no normalization rule:<br>${chars}<br><br>→ <a class="link" href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord #normalization-discussion</a><br>→ Message <strong>no_where.ghost_002</strong><br><br>You can also add an override above to manually define the output for this whole word.</div></div>`;
+
+  var unregKeys = Object.keys(result.unregs || {});
+  if (unregKeys.length > 0) {
+    var chars = unregKeys.map(function(c){ return '<span class="char-tag">' + esc(c) + '</span>'; }).join(" ");
+    warnHtml += '<div class="warn-block unreg"><div class="warn-header">\u26a0 Unregistered Characters</div>'
+      + '<div class="warn-body">The following characters have no normalization rule:<br>' + chars
+      + '<br><br>\u2192 <a class="link" href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord #normalization-discussion</a><br>'
+      + '\u2192 Message <strong>no_where.ghost_002</strong><br><br>'
+      + 'You can also add an override above to manually define the output for this whole word.</div></div>';
   }
-  wa.innerHTML=warnHtml;
+
+  wa.innerHTML = warnHtml;
 }
 
-function copyAll(){
-  const items=[...document.querySelectorAll(".v-text")].map(el=>el.textContent);
-  if(!items.length) return;
-  navigator.clipboard.writeText(items.join("\n")).then(()=>{
-    const btn=[...document.querySelectorAll("button")].find(b=>b.textContent==="Copy All");
-    if(btn){ btn.textContent="Copied!"; setTimeout(()=>btn.textContent="Copy All",1600); }
-  });
+function copyAll() {
+  var items = [];
+  var els = document.querySelectorAll(".v-text");
+  for (var i = 0; i < els.length; i++) items.push(els[i].textContent);
+  if (!items.length) return;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(items.join("\n")).catch(function(){});
+  }
+  var btns = document.querySelectorAll("button");
+  for (var b = 0; b < btns.length; b++) {
+    if (btns[b].textContent === "Copy All") {
+      btns[b].textContent = "Copied!";
+      setTimeout(function(){ btns[b].textContent = "Copy All"; }, 1600);
+      break;
+    }
+  }
 }
-function updateMeta(){
-  const v=document.getElementById("input").value;
-  document.getElementById("charCount").textContent=v.length?v.length+" chars":"";
-  const spaces=(v.match(/ /g)||[]).length;
-  document.getElementById("spaceNote").textContent=spaces>0?spaces+" space"+(spaces>1?"s":"")+" detected":"";
+
+function clearInput() {
+  document.getElementById("input").value = "";
+  document.getElementById("mainOut").style.display = "none";
+  updateMeta();
 }
-function togglePanel(id){
-  const el=document.getElementById(id);
-  const arrow=document.getElementById(id+"Arrow");
-  const open=el.classList.toggle("open");
-  if(arrow) arrow.textContent=open?"▼":"▶";
+
+function updateMeta() {
+  var v = document.getElementById("input").value;
+  document.getElementById("charCount").textContent = v.length ? v.length + " chars" : "";
+  var spaces = (v.match(/ /g) || []).length;
+  document.getElementById("spaceNote").textContent = spaces > 0
+    ? spaces + " space" + (spaces > 1 ? "s" : "") + " detected" : "";
 }
-document.getElementById("input").addEventListener("input",updateMeta);
-document.getElementById("input").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); run(); } });
-document.getElementById("abbrList").innerHTML=TITLE_ABBRS.map(a=>`<span class="abbr-tag">${a}.</span>`).join("");
+
+function togglePanel() {
+  var el = document.getElementById("overPanel");
+  var arrow = document.getElementById("panelArrow");
+  var open = el.classList.toggle("open");
+  arrow.textContent = open ? "\u25bc" : "\u25b6";
+}
+
+document.getElementById("input").addEventListener("input", updateMeta);
+document.getElementById("input").addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); }
+});
+
+document.getElementById("abbrList").innerHTML = TITLE_ABBRS.map(function(a) {
+  return '<span class="abbr-tag">' + a + '.</span>';
+}).join("");
+
 renderOverrides();
 updateMeta();
 </script>
