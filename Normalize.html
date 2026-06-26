@@ -169,7 +169,7 @@
       <div class="abbr-list">
         <span class="abbr-chip">dr</span><span class="abbr-chip">ms</span><span class="abbr-chip">mr</span>
         <span class="abbr-chip">mrs</span><span class="abbr-chip">st</span><span class="abbr-chip">rd</span>
-        <span class="abbr-chip">and</span><span class="abbr-chip">mt</span>
+        <span class="abbr-chip">mt</span>
       </div>
       <p><strong style="color:var(--text)">Punctuation quick reference:</strong></p>
       <p>
@@ -186,6 +186,9 @@
         apostrophe before a generated hyphen → hyphen removed
       </p>
       <br>
+      <p><strong style="color:var(--text)">Currency symbols:</strong></p>
+      <p>€ euro &nbsp;·&nbsp; £ pound &nbsp;·&nbsp; ¥ yen &nbsp;·&nbsp; ₩ won &nbsp;·&nbsp; ₹ rupee &nbsp;·&nbsp; $ dollar &nbsp;·&nbsp; ₽ ruble &nbsp;·&nbsp; ฿ baht &nbsp;·&nbsp; ₫ dong &nbsp;·&nbsp; ₴ hryvnia &nbsp;·&nbsp; ₲ guarani &nbsp;·&nbsp; ₦ naira &nbsp;·&nbsp; ₵ cedi &nbsp;·&nbsp; ₡ colon &nbsp;·&nbsp; ₸ tenge &nbsp;·&nbsp; ؋ afghani &nbsp;·&nbsp; ₺ lira</p>
+      <br>
       <p><strong style="color:var(--text)">Missing a rule or character? Suggest it:</strong></p>
       <p>→ <a href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord normalization channel</a></p>
       <p>→ Message <strong style="color:var(--accent2)">no_where.ghost_002</strong> on Discord</p>
@@ -198,7 +201,7 @@
 //  CONSTANTS
 // ═══════════════════════════════════════════════════════════
 
-const TITLE_ABBRS = ["dr","ms","mr","mrs","st","rd","and","mt"];
+const TITLE_ABBRS = ["dr","ms","mr","mrs","st","rd","mt"];
 const MAX_VARIANTS = 48;
 const DISCORD_LINK = "https://discord.com/channels/1145887707323699340/1360164828651716660";
 const DISCORD_USER = "no_where.ghost_002";
@@ -209,6 +212,27 @@ const ones = [
   "seventeen","eighteen","nineteen"
 ];
 const tensW = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+
+// Currency symbols → spoken word
+const CURRENCY_MAP = {
+  "\u20AC": "euro",    // €
+  "\u00A3": "pound",   // £
+  "\u00A5": "yen",     // ¥
+  "\u20A9": "won",     // ₩
+  "\u20B9": "rupee",   // ₹
+  "\u0024": "dollar",  // $
+  "\u20BD": "ruble",   // ₽
+  "\u0E3F": "baht",    // ฿
+  "\u20AB": "dong",    // ₫
+  "\u20B4": "hryvnia", // ₴
+  "\u20B2": "guarani", // ₲
+  "\u20A6": "naira",   // ₦
+  "\u20B5": "cedi",    // ₵
+  "\u20A1": "colon",   // ₡
+  "\u20B8": "tenge",   // ₸
+  "\u060B": "afghani", // ؋
+  "\u20BA": "lira",    // ₺
+};
 
 // ═══════════════════════════════════════════════════════════
 //  STORAGE  —  overrides are NOW "additional variants", not replacements
@@ -261,10 +285,39 @@ function renderOverrides() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NUMBER → WORDS  (digit by digit)
+//  NUMBER → WORDS
 // ═══════════════════════════════════════════════════════════
 
 function digitToWord(d) { return ones[parseInt(d, 10)]; }
+
+// Full spoken form, no "and", spaces replaced by hyphens.
+// Returns null if n > 1,000,000,000 (1 billion) — caller shows warning.
+function numToWords(n) {
+  if (n > 1_000_000_000) return null;
+  if (n < 20)  return ones[n];
+  if (n < 100) {
+    const t = tensW[Math.floor(n / 10)];
+    const o = n % 10;
+    return o ? t + "-" + ones[o] : t;
+  }
+  if (n < 1_000) {
+    const h = ones[Math.floor(n / 100)] + "-hundred";
+    const r = n % 100;
+    return r ? h + "-" + numToWords(r) : h;
+  }
+  if (n < 1_000_000) {
+    const hi = numToWords(Math.floor(n / 1_000)) + "-thousand";
+    const r  = n % 1_000;
+    return r ? hi + "-" + numToWords(r) : hi;
+  }
+  if (n < 1_000_000_000) {
+    const hi = numToWords(Math.floor(n / 1_000_000)) + "-million";
+    const r  = n % 1_000_000;
+    return r ? hi + "-" + numToWords(r) : hi;
+  }
+  // Exactly 1 billion
+  return "one-billion";
+}
 
 // ═══════════════════════════════════════════════════════════
 //  INPUT VALIDATION
@@ -293,6 +346,7 @@ function isLetter(c) { return /^[a-z]$/.test(c); }
 function isDigit(c)  { return /^[0-9]$/.test(c); }
 
 const KNOWN_PUNCT = new Set(['(',')','{','}','[',']','/','\\','~','_','.',',',':',';','+','!','?',"'",'-','^']);
+const CURRENCY_CHARS = new Set(Object.keys(CURRENCY_MAP));
 
 // ═══════════════════════════════════════════════════════════
 //  TOKENIZER
@@ -318,6 +372,10 @@ function tokenize(raw) {
       while (i < s.length && s[i] === c) { run += c; i++; }
       tokens.push({ t: "punct", ch: c, count: run.length, v: run });
       continue;
+    }
+    if (CURRENCY_CHARS.has(c)) {
+      tokens.push({ t: "currency", v: c, word: CURRENCY_MAP[c] });
+      i++; continue;
     }
     tokens.push({ t: "unknown", v: c });
     i++;
@@ -369,6 +427,13 @@ function buildSegments(tokens) {
 
   const n = tokens.length;
 
+  // Helper: does this token produce visible word content (not a pure hyphen)?
+  function isWordlike(tk) {
+    return tk && (tk.t === "letter" || tk.t === "digit-run" || tk.t === "currency" ||
+      (tk.t === "punct" && (tk.ch === "+" || tk.ch === ":" || tk.ch === ";" ||
+        "([{)]}".includes(tk.ch) && !tk.paired)));
+  }
+
   for (let i = 0; i < n; i++) {
     const tk = tokens[i];
     const atStart = i === 0;
@@ -380,11 +445,54 @@ function buildSegments(tokens) {
 
     if (tk.t === "hyphen") { push(["-"], true, false); continue; }
 
+    // ── Currency ──
+    if (tk.t === "currency") {
+      // At start/end: no surrounding hyphens (they get stripped anyway)
+      // In middle: the word itself; hyphens come from adjacency in assembler
+      // We need a separator before and after if adjacent to letters/digits
+      const needBefore = !atStart;
+      const needAfter  = !atEnd;
+      if (needBefore) push([""], true, false);
+      push([tk.word]);
+      if (needAfter)  push([""], true, false);
+      continue;
+    }
+
+    // ── Digit run ──
     if (tk.t === "digit-run") {
-      // Each digit becomes its own word, separated by generated hyphens
-      for (let d = 0; d < tk.v.length; d++) {
-        if (d > 0) push([""], true, false);
-        push([digitToWord(tk.v[d])]);
+      const prev = tokens[i - 1];
+      const next = tokens[i + 1];
+      const hasLeadingZero = tk.v.length > 1 && tk.v[0] === "0";
+      const numericValue   = parseInt(tk.v, 10);
+      const overBillion    = numericValue > 1_000_000_000;
+
+      // Separator before if previous token was a letter or currency
+      if (!atStart && prev && (prev.t === "letter" || prev.t === "currency")) {
+        push([""], true, false);
+      }
+
+      // Build digit-by-digit form (always present)
+      const digitWords = tk.v.split("").map(digitToWord);
+
+      if (!hasLeadingZero && !overBillion && tk.v.length > 1) {
+        // Two variant slots: [digit-by-digit, full-form]
+        const fullForm = numToWords(numericValue);
+        // Interleave as a single branching segment covering the whole run.
+        // We emit one segment with two alts: the joined digit form and the full form.
+        const digitForm = digitWords.join("-");
+        push([digitForm, fullForm]);
+      } else if (overBillion) {
+        // Digit-by-digit only, mark that a warning is needed
+        const digitForm = digitWords.join("-");
+        push([digitForm, { overBillion: tk.v }]);
+      } else {
+        // Leading zeros or single digit — digit-by-digit only (single digit has same result both ways)
+        push([digitWords.join("-")]);
+      }
+
+      // Separator after if next token is a letter or currency
+      if (!atEnd && next && (next.t === "letter" || next.t === "currency")) {
+        push([""], true, false);
       }
       continue;
     }
@@ -395,8 +503,8 @@ function buildSegments(tokens) {
 
     // ── / and \ (merging hyphens) ──
     if (ch === "/" || ch === "\\") {
-      if (atStart) continue; // ignored at word start
-      push([""], true, true); // merging
+      if (atStart) continue;
+      push([""], true, true);
       continue;
     }
 
@@ -455,11 +563,14 @@ function buildSegments(tokens) {
       const isOpener = ch in OPEN_CLOSE;
       const name = BNAMES[ch];
       if (tk.paired) {
-        // Paired: whole group = 1 hyphen, ignored at edges
+        // The WHOLE run (all `count` chars) is paired as one unit → 1 hyphen.
+        // Ignored at word edges.
         if (atStart || atEnd) continue;
         push([""], true, false);
       } else {
-        // Unpaired: each char = its own name token
+        // Unpaired run: each individual char becomes its own name segment.
+        // Opener runs at word start → ignored entirely.
+        // Closer runs at word end → ignored entirely.
         if (atStart && isOpener) continue;
         if (atEnd   && !isOpener) continue;
         for (let p = 0; p < count; p++) {
@@ -505,7 +616,6 @@ function cartesian(segAlts) {
 // ═══════════════════════════════════════════════════════════
 
 function assembleCombo(combo, segs) {
-  // Build array of { val, isGenH, isMerg }
   const parts = combo.map((val, i) => ({
     val,
     isGenH: segs[i].isH && val === "",
@@ -513,49 +623,57 @@ function assembleCombo(combo, segs) {
     isExplicitHyphen: segs[i].isH && val === "-",
   }));
 
-  // Merge adjacent hyphen-producing segments into final hyphen strings
   let str = "";
-  let i = 0;
+  let i   = 0;
+
   while (i < parts.length) {
     const p = parts[i];
 
-    // Not a hyphen segment — just append
     if (!p.isGenH && !p.isExplicitHyphen) {
       str += p.val;
       i++;
       continue;
     }
 
-    // Collect a run of hyphen-producing parts
-    let j = i;
-    let explicitHyphens = 0; // count of literal "-" from input
-    let mergingCount    = 0; // count of merging segments (/ \)
-    let hasNormalGenH   = false; // non-merging generated hyphen present
+    // Collect a contiguous run of hyphen-producing parts
+    let j              = i;
+    let explicitCount  = 0;
+    let mergingCount   = 0;
+    let hasNormalGenH  = false;
 
     while (j < parts.length && (parts[j].isGenH || parts[j].isExplicitHyphen)) {
-      if (parts[j].isExplicitHyphen) explicitHyphens++;
-      else if (parts[j].isMerg)      mergingCount++;
-      else                           hasNormalGenH = true;
+      if      (parts[j].isExplicitHyphen) explicitCount++;
+      else if (parts[j].isMerg)           mergingCount++;
+      else                                hasNormalGenH = true;
       j++;
     }
 
-    // Also absorb any explicit "-" chars that were already appended to str
+    // Absorb any trailing explicit hyphens already written to str
     while (str.endsWith("-")) {
       str = str.slice(0, -1);
-      explicitHyphens++;
+      explicitCount++;
     }
 
-    // Total hyphens:
-    // base = max(1 if any genH, 0) + explicitHyphens
-    // each merging group adds 1 on top of whatever explicit hyphens exist
-    let total = explicitHyphens + mergingCount + (hasNormalGenH ? 1 : 0);
-    if (total === 0) total = 1; // at least 1 if we're in this branch
+    // Compute final hyphen count:
+    // - Explicit hyphens always count
+    // - Each merging segment (/\) adds 1 on top of whatever explicit hyphens exist
+    // - A normal generated hyphen (paired bracket, period, comma, etc.) only adds 1
+    //   IF there are no explicit hyphens already — it is absorbed otherwise
+    let total;
+    if (explicitCount > 0) {
+      // Explicit hyphens present — normal genH is absorbed, only merging adds extra
+      total = explicitCount + mergingCount;
+    } else {
+      // No explicit hyphens — normal genH contributes its 1
+      total = mergingCount + (hasNormalGenH ? 1 : 0);
+    }
+    if (total === 0) total = 1;
 
     str += "-".repeat(total);
     i = j;
   }
 
-  // Apostrophe rule: remove any hyphen immediately before an apostrophe
+  // Apostrophe rule: drop any hyphen immediately before an apostrophe
   str = str.replace(/-'/g, "'");
 
   // Strip leading/trailing hyphens
@@ -569,12 +687,14 @@ function assembleCombo(combo, segs) {
 // ═══════════════════════════════════════════════════════════
 
 function assembleVariants(segs) {
-  const unregChars = new Set();
+  const unregChars   = new Set();
+  const overBillions = new Set();
 
-  // Clean segs: extract unreg chars, replace with ""
+  // Clean segs: extract unreg/overBillion markers, replace with ""
   const cleanSegs = segs.map(seg => {
     const cleanAlts = seg.alts.map(a => {
-      if (typeof a === "object" && a.unreg) { unregChars.add(a.unreg); return ""; }
+      if (typeof a === "object" && a.unreg)      { unregChars.add(a.unreg);      return ""; }
+      if (typeof a === "object" && a.overBillion) { overBillions.add(a.overBillion); return ""; }
       return a;
     });
     return { ...seg, alts: [...new Set(cleanAlts)] };
@@ -592,7 +712,7 @@ function assembleVariants(segs) {
     if (str.length > 0 && !seen.has(str)) { seen.add(str); variants.push(str); }
   }
 
-  return { variants, unregChars: [...unregChars], capped };
+  return { variants, unregChars: [...unregChars], overBillions: [...overBillions], capped };
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -658,7 +778,7 @@ function showInvalid(reason) {
   const msgs = {
     empty:         "No input provided.",
     "multi-word":  "Too many words after the title prefix. Only one word is allowed after a prefix like dr., mr., etc.",
-    "invalid-space": "Spaces are not allowed unless the word starts with a recognized title abbreviation (dr, ms, mr, mrs, st, rd, and, mt) followed by a period and a single word.",
+    "invalid-space": "Spaces are not allowed unless the word starts with a recognized title abbreviation (dr, ms, mr, mrs, st, rd, mt) followed by a period and a single word.",
   };
   document.getElementById("warnBody").innerHTML = `
     <div style="margin-bottom:10px">${msgs[reason] || "Unknown error."}</div>
