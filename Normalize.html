@@ -106,6 +106,152 @@
   .abbr-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
   .abbr-chip { background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px; padding: 1px 8px; font-size: 11px; color: var(--accent2); }
   .cap-warn { font-size: 11px; color: var(--warn); margin-top: 8px; }
+
+  /* ── Settings floating button ── */
+  .settings-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    padding: 0;
+  }
+  .settings-fab:hover { background: var(--surface); border-color: var(--accent); color: var(--accent); transform: scale(1.08); }
+  .settings-fab.open  { background: #0d1f35; border-color: var(--accent); color: var(--accent); transform: rotate(30deg); }
+
+  /* ── Settings overlay backdrop ── */
+  .settings-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(0,0,0,0.45);
+  }
+  .settings-backdrop.open { display: block; }
+
+  /* ── Settings panel ── */
+  .settings-panel {
+    position: fixed;
+    bottom: 82px;
+    right: 24px;
+    width: min(360px, calc(100vw - 32px));
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 20px;
+    z-index: 101;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    display: none;
+    transform: translateY(10px);
+    opacity: 0;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+  }
+  .settings-panel.open {
+    display: block;
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .settings-panel-title {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .settings-close-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 16px;
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+  .settings-close-btn:hover { color: var(--text); border-color: transparent; }
+
+  /* ── IUPAC info box ── */
+  .settings-iupac {
+    background: #0a1520;
+    border: 1px solid #1a3050;
+    border-radius: 7px;
+    padding: 10px 13px;
+    font-size: 11px;
+    color: #6a9ac4;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .settings-iupac strong { color: var(--accent); }
+
+  /* ── Number mode selector ── */
+  .num-mode-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .num-mode-options {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .num-mode-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 13px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+    user-select: none;
+  }
+  .num-mode-option:hover { border-color: var(--border2); background: #1e1e2c; }
+  .num-mode-option.selected { border-color: var(--accent); background: #0d1f35; }
+  .num-mode-radio {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--border2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.12s;
+  }
+  .num-mode-option.selected .num-mode-radio { border-color: var(--accent); }
+  .num-mode-radio-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: none;
+  }
+  .num-mode-option.selected .num-mode-radio-dot { display: block; }
+  .num-mode-text { flex: 1; }
+  .num-mode-text .nm-main { font-size: 12px; color: var(--text); }
+  .num-mode-text .nm-sub  { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.04em; }
+  .num-mode-option.selected .nm-main { color: var(--accent); }
+
+  .settings-coming { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; border-top: 1px solid var(--border); padding-top: 12px; }
 </style>
 </head>
 <body>
@@ -113,7 +259,7 @@
 
   <header>
     <div class="logo">Shiritori</div>
-    <h1>Normalizer</h1>
+    <h1>Normalizer <span style="font-size:0.55rem;font-weight:400;color:var(--muted);letter-spacing:0.15em;vertical-align:middle">VERSION 3</span></h1>
     <div class="tagline">Converts words to spoken hyphenated form · a-z, hyphen, apostrophe only</div>
   </header>
 
@@ -195,6 +341,51 @@
     </div>
   </div>
 
+</div>
+
+<!-- Settings floating button -->
+<button class="settings-fab" id="settingsFab" onclick="toggleSettings()" title="Settings" aria-label="Settings">⚙</button>
+
+<!-- Backdrop -->
+<div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
+
+<!-- Settings panel -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-panel-title">
+    <span>Settings</span>
+    <button class="settings-close-btn" onclick="closeSettings()">✕</button>
+  </div>
+
+  <div class="settings-iupac">
+    <strong>Tip:</strong> Use <strong>Word form only</strong> when normalizing <strong>IUPAC chemical names</strong> — numbers there represent positions, not quantities, so digit-by-digit produces incorrect extra variants.
+  </div>
+
+  <div class="num-mode-label">Number output mode</div>
+  <div class="num-mode-options">
+    <div class="num-mode-option selected" id="nmOpt0" onclick="setNumMode(0)">
+      <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+      <div class="num-mode-text">
+        <div class="nm-main">Both forms</div>
+        <div class="nm-sub">666 → six-six-six &amp; six-hundred-sixty-six</div>
+      </div>
+    </div>
+    <div class="num-mode-option" id="nmOpt1" onclick="setNumMode(1)">
+      <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+      <div class="num-mode-text">
+        <div class="nm-main">Word form only</div>
+        <div class="nm-sub">666 → six-hundred-sixty-six</div>
+      </div>
+    </div>
+    <div class="num-mode-option" id="nmOpt2" onclick="setNumMode(2)">
+      <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+      <div class="num-mode-text">
+        <div class="nm-main">Digit-by-digit only</div>
+        <div class="nm-sub">666 → six-six-six</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-coming">More setting options coming soon</div>
 </div>
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -285,8 +476,49 @@ function renderOverrides() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  NUMBER → WORDS
+//  NUMBER MODE SETTING
+//  0 = both  1 = word-form only  2 = digit-by-digit only
 // ═══════════════════════════════════════════════════════════
+
+let numMode = 0;
+
+function setNumMode(mode) {
+  numMode = mode;
+  [0, 1, 2].forEach(i => {
+    document.getElementById("nmOpt" + i).classList.toggle("selected", i === mode);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SETTINGS PANEL
+// ═══════════════════════════════════════════════════════════
+
+function toggleSettings() {
+  const panel    = document.getElementById("settingsPanel");
+  const backdrop = document.getElementById("settingsBackdrop");
+  const fab      = document.getElementById("settingsFab");
+  const isOpen   = panel.classList.contains("open");
+  if (isOpen) {
+    closeSettings();
+  } else {
+    panel.style.display    = "block";
+    backdrop.classList.add("open");
+    fab.classList.add("open");
+    // Trigger animation on next frame
+    requestAnimationFrame(() => panel.classList.add("open"));
+  }
+}
+
+function closeSettings() {
+  const panel    = document.getElementById("settingsPanel");
+  const backdrop = document.getElementById("settingsBackdrop");
+  const fab      = document.getElementById("settingsFab");
+  panel.classList.remove("open");
+  backdrop.classList.remove("open");
+  fab.classList.remove("open");
+  // Hide after transition
+  setTimeout(() => { if (!panel.classList.contains("open")) panel.style.display = "none"; }, 200);
+}
 
 function digitToWord(d) { return ones[parseInt(d, 10)]; }
 
@@ -366,7 +598,10 @@ function tokenize(raw) {
     }
     if (isLetter(c)) { tokens.push({ t: "letter", v: c }); i++; continue; }
     if (c === "-")   { tokens.push({ t: "hyphen", v: "-" }); i++; continue; }
-    if (c === "'")   { tokens.push({ t: "apostrophe", v: "'" }); i++; continue; }
+    // All apostrophe variants normalize to standard apostrophe
+    if ("'\u2019\u2018\u02BC\u0060\u02BB\u2032".includes(c)) {
+      tokens.push({ t: "apostrophe", v: "'" }); i++; continue;
+    }
     if (KNOWN_PUNCT.has(c)) {
       let run = "";
       while (i < s.length && s[i] === c) { run += c; i++; }
@@ -477,10 +712,8 @@ function buildSegments(tokens) {
       if (!hasLeadingZero && !overBillion && tk.v.length > 1) {
         // Two variant slots: [digit-by-digit, full-form]
         const fullForm = numToWords(numericValue);
-        // Interleave as a single branching segment covering the whole run.
-        // We emit one segment with two alts: the joined digit form and the full form.
         const digitForm = digitWords.join("-");
-        push([digitForm, fullForm]);
+        segs.push({ alts: [digitForm, fullForm], isH: false, isMerg: false, numBranch: true });
       } else if (overBillion) {
         // Digit-by-digit only, mark that a warning is needed
         const digitForm = digitWords.join("-");
@@ -552,9 +785,12 @@ function buildSegments(tokens) {
     // ── Plus ──
     if (ch === "+") {
       for (let p = 0; p < count; p++) {
-        if (p > 0) push([""], true, false);
+        // separator before each plus (unless word start)
+        if (!atStart || p > 0) push([""], true, false);
         push(["plus"]);
       }
+      // separator after last plus (unless word end)
+      if (!atEnd) push([""], true, false);
       continue;
     }
 
@@ -616,67 +852,76 @@ function cartesian(segAlts) {
 // ═══════════════════════════════════════════════════════════
 
 function assembleCombo(combo, segs) {
-  const parts = combo.map((val, i) => ({
-    val,
-    isGenH: segs[i].isH && val === "",
-    isMerg: segs[i].isMerg || false,
-    isExplicitHyphen: segs[i].isH && val === "-",
-  }));
+  // Tag every position as one of:
+  //   { kind:"text",  val:string }          — literal output (letters, words, apostrophe)
+  //   { kind:"expH",  count:number }        — explicit hyphen(s) from original input "-"
+  //   { kind:"genH"  }                      — generated hyphen (normalization produced it)
+  //   { kind:"mergH" }                      — merging generated hyphen (/ \)
 
-  let str = "";
-  let i   = 0;
+  const tagged = combo.map((val, i) => {
+    const seg = segs[i];
+    if (seg.isH) {
+      if (val === "-") return { kind: "expH", count: 1 };
+      if (seg.isMerg)  return { kind: "mergH" };
+      return { kind: "genH" };
+    }
+    return { kind: "text", val };
+  });
 
-  while (i < parts.length) {
-    const p = parts[i];
+  // Pass 1: collapse runs of hyphen tags into a single resolved hyphen string.
+  // A run is a maximal consecutive sequence of expH / genH / mergH tags.
+  // Rules within a run:
+  //   - Sum all expH counts → E
+  //   - Count mergH tags    → M
+  //   - Any genH present?   → G (boolean)
+  //   - If E > 0: total hyphens = E + M  (genH absorbed by existing explicit)
+  //   - If E = 0: total hyphens = M + (G ? 1 : 0), minimum 1 if any hyphen tag present
+  // Result: E explicit hyphens written as "-", remainder as GEN_H placeholder.
 
-    if (!p.isGenH && !p.isExplicitHyphen) {
-      str += p.val;
+  const GEN_H = "\x01";
+  const parts  = []; // { isHyphenBlock:bool, str:string }
+
+  let i = 0;
+  while (i < tagged.length) {
+    const t = tagged[i];
+
+    if (t.kind === "text") {
+      parts.push({ isHyphenBlock: false, str: t.val });
       i++;
       continue;
     }
 
-    // Collect a contiguous run of hyphen-producing parts
-    let j              = i;
-    let explicitCount  = 0;
-    let mergingCount   = 0;
-    let hasNormalGenH  = false;
-
-    while (j < parts.length && (parts[j].isGenH || parts[j].isExplicitHyphen)) {
-      if      (parts[j].isExplicitHyphen) explicitCount++;
-      else if (parts[j].isMerg)           mergingCount++;
-      else                                hasNormalGenH = true;
+    // Collect hyphen run
+    let E = 0, M = 0, G = false;
+    let j = i;
+    while (j < tagged.length && tagged[j].kind !== "text") {
+      const tt = tagged[j];
+      if      (tt.kind === "expH")  E += tt.count;
+      else if (tt.kind === "mergH") M++;
+      else if (tt.kind === "genH")  G = true;
       j++;
     }
 
-    // Absorb any trailing explicit hyphens already written to str
-    while (str.endsWith("-")) {
-      str = str.slice(0, -1);
-      explicitCount++;
-    }
+    let expPart = E;
+    let genPart = E > 0 ? M : M + (G ? 1 : 0);
+    if (expPart === 0 && genPart === 0) genPart = 1; // at least 1 hyphen
 
-    // Compute final hyphen count:
-    // - Explicit hyphens always count
-    // - Each merging segment (/\) adds 1 on top of whatever explicit hyphens exist
-    // - A normal generated hyphen (paired bracket, period, comma, etc.) only adds 1
-    //   IF there are no explicit hyphens already — it is absorbed otherwise
-    let total;
-    if (explicitCount > 0) {
-      // Explicit hyphens present — normal genH is absorbed, only merging adds extra
-      total = explicitCount + mergingCount;
-    } else {
-      // No explicit hyphens — normal genH contributes its 1
-      total = mergingCount + (hasNormalGenH ? 1 : 0);
-    }
-    if (total === 0) total = 1;
-
-    str += "-".repeat(total);
+    const blockStr = "-".repeat(expPart) + GEN_H.repeat(genPart);
+    parts.push({ isHyphenBlock: true, str: blockStr });
     i = j;
   }
 
-  // Apostrophe rule: drop any hyphen immediately before an apostrophe
-  str = str.replace(/-'/g, "'");
+  // Pass 2: join parts into string
+  let str = parts.map(p => p.str).join("");
 
-  // Strip leading/trailing hyphens
+  // Pass 3: apostrophe rule — only remove GEN_H placeholders immediately before '
+  // Real explicit hyphens ("-") before "'" are preserved.
+  str = str.replace(new RegExp(GEN_H + "+(?=')", "g"), "");
+
+  // Pass 4: convert remaining GEN_H placeholders to real hyphens
+  str = str.replace(new RegExp(GEN_H, "g"), "-");
+
+  // Pass 5: strip leading/trailing hyphens (should be rare but safeguard)
   str = str.replace(/^-+/, "").replace(/-+$/, "");
 
   return str;
@@ -690,10 +935,17 @@ function assembleVariants(segs) {
   const unregChars   = new Set();
   const overBillions = new Set();
 
+  // Find which seg indices are number-branching segments (have both digit and word form)
+  // These are segs where alts has 2 entries and one came from a digit-run with fullForm
+  // We tag them during buildSegments by adding a numBranch flag
+  const numBranchIndices = new Set(
+    segs.map((s, i) => s.numBranch ? i : -1).filter(i => i >= 0)
+  );
+
   // Clean segs: extract unreg/overBillion markers, replace with ""
   const cleanSegs = segs.map(seg => {
     const cleanAlts = seg.alts.map(a => {
-      if (typeof a === "object" && a.unreg)      { unregChars.add(a.unreg);      return ""; }
+      if (typeof a === "object" && a.unreg)       { unregChars.add(a.unreg);       return ""; }
       if (typeof a === "object" && a.overBillion) { overBillions.add(a.overBillion); return ""; }
       return a;
     });
@@ -705,11 +957,28 @@ function assembleVariants(segs) {
   const capped  = combos.length >= MAX_VARIANTS;
 
   const seen     = new Set();
-  const variants = [];
+  const variants = []; // { text, numType: "digit"|"word"|"none" }
 
   for (const combo of combos) {
     const str = assembleCombo(combo, cleanSegs);
-    if (str.length > 0 && !seen.has(str)) { seen.add(str); variants.push(str); }
+    if (str.length === 0 || seen.has(str)) continue;
+    seen.add(str);
+
+    // Determine numType by checking whether any numBranch seg used index 0 (digit) or 1 (word)
+    let numType = "none";
+    for (const idx of numBranchIndices) {
+      if (idx >= combo.length) continue;
+      const val = combo[idx];
+      const seg = cleanSegs[idx];
+      if (seg.alts.length >= 2) {
+        // index 0 = digit form, index 1 = word form
+        const choiceIdx = seg.alts.indexOf(val);
+        if (choiceIdx === 0) { numType = "digit"; break; }
+        if (choiceIdx === 1) { numType = "word";  break; }
+      }
+    }
+
+    variants.push({ text: str, numType });
   }
 
   return { variants, unregChars: [...unregChars], overBillions: [...overBillions], capped };
@@ -720,25 +989,27 @@ function assembleVariants(segs) {
 // ═══════════════════════════════════════════════════════════
 
 function normalizeWord(raw) {
-  const tokens = tokenize(raw);
+  const tokens  = tokenize(raw);
   const labeled = labelBrackets(tokens);
   const segs    = buildSegments(labeled);
-  const { variants, unregChars, capped } = assembleVariants(segs);
+  const { variants, unregChars, overBillions, capped } = assembleVariants(segs);
 
-  // Append any user-added extra variants (do NOT replace)
-  const overrides = getOverrides();
-  const extras    = overrides[raw] || [];
-  const extraVariants = extras.filter(e => !variants.includes(e));
+  const overrides     = getOverrides();
+  const extras        = overrides[raw] || [];
+  const extraVariants = extras
+    .filter(e => !variants.some(v => v.text === e))
+    .map(e => ({ text: e, numType: "none", custom: true }));
 
-  return { variants, extraVariants, unregChars, capped };
+  return { variants, extraVariants, unregChars, overBillions, capped };
 }
 
 function normalizeTitleWord(prefix, wordRaw) {
-  const { variants, extraVariants, unregChars, capped } = normalizeWord(wordRaw);
+  const { variants, extraVariants, unregChars, overBillions, capped } = normalizeWord(wordRaw);
   return {
-    variants:      variants.map(v => prefix + "-" + v),
-    extraVariants: extraVariants.map(v => prefix + "-" + v),
+    variants:      variants.map(v => ({ ...v, text: prefix + "-" + v.text })),
+    extraVariants: extraVariants.map(v => ({ ...v, text: prefix + "-" + v.text })),
     unregChars,
+    overBillions,
     capped,
   };
 }
@@ -788,10 +1059,18 @@ function showInvalid(reason) {
   `;
 }
 
-function showOutput({ variants, extraVariants, unregChars, capped }) {
+function showOutput({ variants, extraVariants, unregChars, overBillions, capped }) {
+  // Filter variants by current number mode
+  const filtered = variants.filter(v => {
+    if (numMode === 0) return true;                          // both
+    if (numMode === 1) return v.numType !== "digit";        // word form only (keep none + word)
+    if (numMode === 2) return v.numType !== "word";         // digit only (keep none + digit)
+    return true;
+  });
+
   const all = [
-    ...variants.map(v => ({ v, custom: false })),
-    ...extraVariants.map(v => ({ v, custom: true })),
+    ...filtered.map(v => ({ v: v.text, custom: false })),
+    ...extraVariants.map(v => ({ v: v.text, custom: true })),
   ];
 
   const card = document.getElementById("outputCard");
@@ -822,20 +1101,36 @@ function showOutput({ variants, extraVariants, unregChars, capped }) {
 
   if (all.length > 0) document.getElementById("copyBtn").style.display = "inline-block";
 
-  if (unregChars.length > 0) {
+  if (unregChars.length > 0 || overBillions.length > 0) {
     const warnCard = document.getElementById("warnCard");
-    warnCard.className   = "warn-card";
+    warnCard.className    = "warn-card";
     warnCard.style.display = "block";
     document.getElementById("warnTitle").className   = "warn-title";
-    document.getElementById("warnTitle").textContent = "Unregistered characters";
-    document.getElementById("unregChars").innerHTML  =
+
+    let titleText = [];
+    if (unregChars.length > 0)  titleText.push("Unregistered characters");
+    if (overBillions.length > 0) titleText.push("Extreme number");
+    document.getElementById("warnTitle").textContent = titleText.join(" · ");
+
+    document.getElementById("unregChars").innerHTML =
       unregChars.map(c => `<span class="unreg-chip">${c}</span>`).join("");
-    document.getElementById("warnBody").innerHTML = `
-      These characters have no normalization rule and were skipped.<br>
-      To suggest a rule:<br>
+
+    let bodyHtml = "";
+    if (overBillions.length > 0) {
+      bodyHtml += `<div style="margin-bottom:10px;color:var(--warn)">
+        ⚠ Number${overBillions.length > 1 ? "s" : ""} exceed 1 billion
+        (<strong>${overBillions.join(", ")}</strong>) — only digit-by-digit form shown.
+        Discuss the correct full-form normalization here:
+      </div>`;
+    }
+    if (unregChars.length > 0) {
+      bodyHtml += `<div style="margin-bottom:8px">Unregistered characters above have no normalization rule and were skipped.</div>`;
+    }
+    bodyHtml += `
       → <a href="${DISCORD_LINK}" target="_blank">Discord normalization channel</a><br>
       → Message <strong style="color:var(--accent2)">${DISCORD_USER}</strong>
     `;
+    document.getElementById("warnBody").innerHTML = bodyHtml;
   }
 }
 
