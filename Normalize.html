@@ -252,6 +252,59 @@
   .num-mode-option.selected .nm-main { color: var(--accent); }
 
   .settings-coming { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; border-top: 1px solid var(--border); padding-top: 12px; }
+
+  /* ── Settings tabs ── */
+  .settings-tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
+  .settings-tab {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 7px 14px; border: none; background: none; color: var(--muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .settings-tab:hover { color: var(--text); border-color: transparent; }
+  .settings-tab.active { color: var(--accent); border-color: var(--accent); }
+  .settings-tab-panel { display: none; }
+  .settings-tab-panel.active { display: block; }
+
+  /* ── Greek settings tip ── */
+  .settings-greek-tip {
+    background: #140f22;
+    border: 1px solid #2e1f50;
+    border-radius: 7px;
+    padding: 10px 13px;
+    font-size: 11px;
+    color: #9a7ad4;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .settings-greek-tip strong { color: var(--accent2); }
+
+  /* ── Collapsible reference lists ── */
+  .ref-section { margin-bottom: 14px; }
+  .ref-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; padding: 7px 0; border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .ref-toggle:hover .ref-toggle-title { color: var(--accent); }
+  .ref-toggle-title { font-size: 11px; font-weight: 600; color: var(--text); letter-spacing: 0.06em; text-transform: uppercase; }
+  .ref-toggle-arrow { font-size: 10px; color: var(--muted); transition: transform 0.15s; }
+  .ref-toggle-arrow.open { transform: rotate(90deg); }
+  .ref-list { display: none; padding-top: 8px; }
+  .ref-list.open { display: block; }
+  .ref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 3px 12px;
+  }
+  .ref-item {
+    display: flex; align-items: baseline; gap: 8px;
+    font-size: 11px; padding: 2px 0;
+    border-bottom: 1px solid #1a1a24;
+  }
+  .ref-item-sym { color: var(--accent2); font-size: 13px; min-width: 22px; }
+  .ref-item-name { color: var(--muted); }
+  .ref-item-arrow { color: #333348; font-size: 9px; }
 </style>
 </head>
 <body>
@@ -259,7 +312,7 @@
 
   <header>
     <div class="logo">Shiritori</div>
-    <h1>Normalizer <span style="font-size:0.55rem;font-weight:400;color:var(--muted);letter-spacing:0.15em;vertical-align:middle">VERSION 3</span></h1>
+    <h1>Normalizer <span style="font-size:0.55rem;font-weight:400;color:var(--muted);letter-spacing:0.15em;vertical-align:middle">VERSION 4</span></h1>
     <div class="tagline">Converts words to spoken hyphenated form · a-z, hyphen, apostrophe only</div>
   </header>
 
@@ -309,35 +362,124 @@
       <span id="infoArrow">▶</span>
     </button>
     <div class="info-body" id="infoBody">
-      <p>All output must only contain <strong style="color:var(--accent)">a–z</strong>, <strong style="color:var(--accent)">-</strong> (hyphen), and <strong style="color:var(--accent)">'</strong> (apostrophe). Words cannot start or end with a hyphen.</p>
-      <br>
-      <p><strong style="color:var(--text)">Title abbreviations</strong> — absorb a following period and space:</p>
-      <div class="abbr-list">
-        <span class="abbr-chip">dr</span><span class="abbr-chip">ms</span><span class="abbr-chip">mr</span>
-        <span class="abbr-chip">mrs</span><span class="abbr-chip">st</span><span class="abbr-chip">rd</span>
-        <span class="abbr-chip">mt</span>
+      <p style="margin-bottom:12px">All output must only contain <strong style="color:var(--accent)">a–z</strong>, <strong style="color:var(--accent)">-</strong> (hyphen), and <strong style="color:var(--accent)">'</strong> (apostrophe). Words cannot start or end with a hyphen.</p>
+
+      <div class="ref-section">
+        <div class="ref-toggle" onclick="toggleRef('refAbbr',this)">
+          <span class="ref-toggle-title">Title abbreviations</span>
+          <span class="ref-toggle-arrow">▶</span>
+        </div>
+        <div class="ref-list" id="refAbbr">
+          <p style="font-size:11px;color:var(--muted);margin-bottom:6px">These absorb a following period and optional space before the next word.</p>
+          <div class="ref-grid">
+            <div class="ref-item"><span class="ref-item-sym">dr</span><span class="ref-item-arrow">→</span><span class="ref-item-name">doctor</span></div>
+            <div class="ref-item"><span class="ref-item-sym">ms</span><span class="ref-item-arrow">→</span><span class="ref-item-name">ms</span></div>
+            <div class="ref-item"><span class="ref-item-sym">mr</span><span class="ref-item-arrow">→</span><span class="ref-item-name">mr</span></div>
+            <div class="ref-item"><span class="ref-item-sym">mrs</span><span class="ref-item-arrow">→</span><span class="ref-item-name">mrs</span></div>
+            <div class="ref-item"><span class="ref-item-sym">st</span><span class="ref-item-arrow">→</span><span class="ref-item-name">saint / street</span></div>
+            <div class="ref-item"><span class="ref-item-sym">rd</span><span class="ref-item-arrow">→</span><span class="ref-item-name">road</span></div>
+            <div class="ref-item"><span class="ref-item-sym">mt</span><span class="ref-item-arrow">→</span><span class="ref-item-name">mount</span></div>
+          </div>
+        </div>
       </div>
-      <p><strong style="color:var(--text)">Punctuation quick reference:</strong></p>
-      <p>
-        / \ → hyphen (merges with adjacent -) &nbsp;·&nbsp;
-        ~ _ → hyphen (no merge, ignored at start/end) &nbsp;·&nbsp;
-        . → hyphen (any count = 1, ignored at start/end) &nbsp;·&nbsp;
-        , → hyphen (any count = 1, ignored at start/end) &nbsp;·&nbsp;
-        : → hyphen (:: = colon-colon, ::: = colon-colon-colon) &nbsp;·&nbsp;
-        ; → hyphen (;; = semicolon/semi-colon variants) &nbsp;·&nbsp;
-        + → plus segment (each + is its own plus) &nbsp;·&nbsp;
-        () [] {} → paired = hyphen, unpaired = parenthesis/bracket/curly-bracket &nbsp;·&nbsp;
-        ! → exclamation-mark / exclamation-point / omit &nbsp;·&nbsp;
-        ? → question-mark / omit &nbsp;·&nbsp;
-        apostrophe before a generated hyphen → hyphen removed
-      </p>
-      <br>
-      <p><strong style="color:var(--text)">Currency symbols:</strong></p>
-      <p>€ euro &nbsp;·&nbsp; £ pound &nbsp;·&nbsp; ¥ yen &nbsp;·&nbsp; ₩ won &nbsp;·&nbsp; ₹ rupee &nbsp;·&nbsp; $ dollar &nbsp;·&nbsp; ₽ ruble &nbsp;·&nbsp; ฿ baht &nbsp;·&nbsp; ₫ dong &nbsp;·&nbsp; ₴ hryvnia &nbsp;·&nbsp; ₲ guarani &nbsp;·&nbsp; ₦ naira &nbsp;·&nbsp; ₵ cedi &nbsp;·&nbsp; ₡ colon &nbsp;·&nbsp; ₸ tenge &nbsp;·&nbsp; ؋ afghani &nbsp;·&nbsp; ₺ lira</p>
-      <br>
-      <p><strong style="color:var(--text)">Missing a rule or character? Suggest it:</strong></p>
-      <p>→ <a href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord normalization channel</a></p>
-      <p>→ Message <strong style="color:var(--accent2)">no_where.ghost_002</strong> on Discord</p>
+
+      <div class="ref-section">
+        <div class="ref-toggle" onclick="toggleRef('refPunct',this)">
+          <span class="ref-toggle-title">Punctuation</span>
+          <span class="ref-toggle-arrow">▶</span>
+        </div>
+        <div class="ref-list" id="refPunct">
+          <div class="ref-grid">
+            <div class="ref-item"><span class="ref-item-sym">- – —</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen</span></div>
+            <div class="ref-item"><span class="ref-item-sym">/ \</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen (merges with adjacent -)</span></div>
+            <div class="ref-item"><span class="ref-item-sym">~ _</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen (no merge)</span></div>
+            <div class="ref-item"><span class="ref-item-sym">.</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen</span></div>
+            <div class="ref-item"><span class="ref-item-sym">,</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen</span></div>
+            <div class="ref-item"><span class="ref-item-sym">:</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen or colon</span></div>
+            <div class="ref-item"><span class="ref-item-sym">;</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen, semicolon, or semi-colon</span></div>
+            <div class="ref-item"><span class="ref-item-sym">+</span><span class="ref-item-arrow">→</span><span class="ref-item-name">plus (each + own word)</span></div>
+            <div class="ref-item"><span class="ref-item-sym">()</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen if paired</span></div>
+            <div class="ref-item"><span class="ref-item-sym">(</span><span class="ref-item-arrow">→</span><span class="ref-item-name">parenthesis if alone</span></div>
+            <div class="ref-item"><span class="ref-item-sym">[]</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen if paired</span></div>
+            <div class="ref-item"><span class="ref-item-sym">[</span><span class="ref-item-arrow">→</span><span class="ref-item-name">bracket if alone</span></div>
+            <div class="ref-item"><span class="ref-item-sym">{}</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hyphen if paired</span></div>
+            <div class="ref-item"><span class="ref-item-sym">{</span><span class="ref-item-arrow">→</span><span class="ref-item-name">curly-bracket if alone</span></div>
+            <div class="ref-item"><span class="ref-item-sym">!</span><span class="ref-item-arrow">→</span><span class="ref-item-name">exclamation-mark / -point / omit</span></div>
+            <div class="ref-item"><span class="ref-item-sym">?</span><span class="ref-item-arrow">→</span><span class="ref-item-name">question-mark / omit</span></div>
+            <div class="ref-item"><span class="ref-item-sym">' ` ′ etc</span><span class="ref-item-arrow">→</span><span class="ref-item-name">apostrophe</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-section">
+        <div class="ref-toggle" onclick="toggleRef('refCurrency',this)">
+          <span class="ref-toggle-title">Currency symbols</span>
+          <span class="ref-toggle-arrow">▶</span>
+        </div>
+        <div class="ref-list" id="refCurrency">
+          <div class="ref-grid">
+            <div class="ref-item"><span class="ref-item-sym">€</span><span class="ref-item-arrow">→</span><span class="ref-item-name">euro</span></div>
+            <div class="ref-item"><span class="ref-item-sym">£</span><span class="ref-item-arrow">→</span><span class="ref-item-name">pound</span></div>
+            <div class="ref-item"><span class="ref-item-sym">¥</span><span class="ref-item-arrow">→</span><span class="ref-item-name">yen</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₩</span><span class="ref-item-arrow">→</span><span class="ref-item-name">won</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₹</span><span class="ref-item-arrow">→</span><span class="ref-item-name">rupee</span></div>
+            <div class="ref-item"><span class="ref-item-sym">$</span><span class="ref-item-arrow">→</span><span class="ref-item-name">dollar</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₽</span><span class="ref-item-arrow">→</span><span class="ref-item-name">ruble</span></div>
+            <div class="ref-item"><span class="ref-item-sym">฿</span><span class="ref-item-arrow">→</span><span class="ref-item-name">baht</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₫</span><span class="ref-item-arrow">→</span><span class="ref-item-name">dong</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₴</span><span class="ref-item-arrow">→</span><span class="ref-item-name">hryvnia</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₲</span><span class="ref-item-arrow">→</span><span class="ref-item-name">guarani</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₦</span><span class="ref-item-arrow">→</span><span class="ref-item-name">naira</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₵</span><span class="ref-item-arrow">→</span><span class="ref-item-name">cedi</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₡</span><span class="ref-item-arrow">→</span><span class="ref-item-name">colon</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₸</span><span class="ref-item-arrow">→</span><span class="ref-item-name">tenge</span></div>
+            <div class="ref-item"><span class="ref-item-sym">؋</span><span class="ref-item-arrow">→</span><span class="ref-item-name">afghani</span></div>
+            <div class="ref-item"><span class="ref-item-sym">₺</span><span class="ref-item-arrow">→</span><span class="ref-item-name">lira</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ref-section">
+        <div class="ref-toggle" onclick="toggleRef('refGreek',this)">
+          <span class="ref-toggle-title">Greek letters</span>
+          <span class="ref-toggle-arrow">▶</span>
+        </div>
+        <div class="ref-list" id="refGreek">
+          <p style="font-size:11px;color:var(--muted);margin-bottom:6px">Each Greek letter has two forms: romanized (e.g. <em>th</em>) and word form (e.g. <em>theta</em>). Control which appears in Settings → Greek.</p>
+          <div class="ref-grid">
+            <div class="ref-item"><span class="ref-item-sym">Α α</span><span class="ref-item-arrow">→</span><span class="ref-item-name">a / alpha</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Β β</span><span class="ref-item-arrow">→</span><span class="ref-item-name">b / beta</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Γ γ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">g / gamma</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Δ δ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">d / delta</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ε ε</span><span class="ref-item-arrow">→</span><span class="ref-item-name">e / epsilon</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ζ ζ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">z / zeta</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Η η</span><span class="ref-item-arrow">→</span><span class="ref-item-name">e / eta</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Θ θ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">th / theta</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ι ι</span><span class="ref-item-arrow">→</span><span class="ref-item-name">i / iota</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Κ κ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">k / kappa</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Λ λ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">l / lambda</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Μ μ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">m / mu</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ν ν</span><span class="ref-item-arrow">→</span><span class="ref-item-name">n / nu</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ξ ξ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">x / xi</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ο ο</span><span class="ref-item-arrow">→</span><span class="ref-item-name">o / omicron</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Π π</span><span class="ref-item-arrow">→</span><span class="ref-item-name">p / pi</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ρ ρ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">r / rho</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Σ σ ς</span><span class="ref-item-arrow">→</span><span class="ref-item-name">s / sigma</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Τ τ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">t / tau</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Υ υ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">y / upsilon</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Φ φ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">ph / phi</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Χ χ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">kh / chi</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ψ ψ</span><span class="ref-item-arrow">→</span><span class="ref-item-name">ps / psi</span></div>
+            <div class="ref-item"><span class="ref-item-sym">Ω ω</span><span class="ref-item-arrow">→</span><span class="ref-item-name">o / omega</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+        <p style="font-size:11px;color:var(--muted)"><strong style="color:var(--text)">Missing a rule or character? Suggest it:</strong></p>
+        <p style="font-size:11px;color:var(--muted)">→ <a href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord normalization channel</a></p>
+        <p style="font-size:11px;color:var(--muted)">→ Message <strong style="color:var(--accent2)">no_where.ghost_002</strong> on Discord</p>
+      </div>
     </div>
   </div>
 
@@ -356,31 +498,69 @@
     <button class="settings-close-btn" onclick="closeSettings()">✕</button>
   </div>
 
-  <div class="settings-iupac">
-    <strong>Tip:</strong> Use <strong>Word form only</strong> when normalizing <strong>IUPAC chemical names</strong> — numbers there represent positions, not quantities, so digit-by-digit produces incorrect extra variants.
+  <div class="settings-tabs">
+    <button class="settings-tab active" onclick="switchSettingsTab('numbers',this)">Numbers</button>
+    <button class="settings-tab" onclick="switchSettingsTab('greek',this)">Greek</button>
   </div>
 
-  <div class="num-mode-label">Number output mode</div>
-  <div class="num-mode-options">
-    <div class="num-mode-option selected" id="nmOpt0" onclick="setNumMode(0)">
-      <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
-      <div class="num-mode-text">
-        <div class="nm-main">Both forms</div>
-        <div class="nm-sub">666 → six-six-six &amp; six-hundred-sixty-six</div>
+  <!-- Numbers tab -->
+  <div class="settings-tab-panel active" id="stab-numbers">
+    <div class="settings-iupac">
+      <strong>Tip:</strong> Use <strong>Word form only</strong> when normalizing <strong>IUPAC chemical names</strong> — numbers there represent positions, not quantities, so digit-by-digit produces incorrect extra variants.
+    </div>
+    <div class="num-mode-label">Number output mode</div>
+    <div class="num-mode-options">
+      <div class="num-mode-option selected" id="nmOpt0" onclick="setNumMode(0)">
+        <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+        <div class="num-mode-text">
+          <div class="nm-main">Both forms</div>
+          <div class="nm-sub">666 → six-six-six &amp; six-hundred-sixty-six</div>
+        </div>
+      </div>
+      <div class="num-mode-option" id="nmOpt1" onclick="setNumMode(1)">
+        <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+        <div class="num-mode-text">
+          <div class="nm-main">Word form only</div>
+          <div class="nm-sub">666 → six-hundred-sixty-six</div>
+        </div>
+      </div>
+      <div class="num-mode-option" id="nmOpt2" onclick="setNumMode(2)">
+        <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+        <div class="num-mode-text">
+          <div class="nm-main">Digit-by-digit only</div>
+          <div class="nm-sub">666 → six-six-six</div>
+        </div>
       </div>
     </div>
-    <div class="num-mode-option" id="nmOpt1" onclick="setNumMode(1)">
-      <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
-      <div class="num-mode-text">
-        <div class="nm-main">Word form only</div>
-        <div class="nm-sub">666 → six-hundred-sixty-six</div>
-      </div>
+  </div>
+
+  <!-- Greek tab -->
+  <div class="settings-tab-panel" id="stab-greek">
+    <div class="settings-greek-tip">
+      <strong>Greek letters</strong> produce two forms: a romanized transliteration (e.g. <em>th</em> for Θ) and the full letter name (e.g. <em>theta</em>). Choose which variants appear in output.
     </div>
-    <div class="num-mode-option" id="nmOpt2" onclick="setNumMode(2)">
-      <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
-      <div class="num-mode-text">
-        <div class="nm-main">Digit-by-digit only</div>
-        <div class="nm-sub">666 → six-six-six</div>
+    <div class="num-mode-label">Greek output mode</div>
+    <div class="num-mode-options">
+      <div class="num-mode-option selected" id="grOpt0" onclick="setGreekMode(0)">
+        <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+        <div class="num-mode-text">
+          <div class="nm-main">Both forms</div>
+          <div class="nm-sub">Θ → th &amp; theta</div>
+        </div>
+      </div>
+      <div class="num-mode-option" id="grOpt1" onclick="setGreekMode(1)">
+        <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+        <div class="num-mode-text">
+          <div class="nm-main">Romanized only</div>
+          <div class="nm-sub">Θ → th</div>
+        </div>
+      </div>
+      <div class="num-mode-option" id="grOpt2" onclick="setGreekMode(2)">
+        <div class="num-mode-radio"><div class="num-mode-radio-dot"></div></div>
+        <div class="num-mode-text">
+          <div class="nm-main">Word form only</div>
+          <div class="nm-sub">Θ → theta</div>
+        </div>
       </div>
     </div>
   </div>
@@ -425,9 +605,45 @@ const CURRENCY_MAP = {
   "\u20BA": "lira",    // ₺
 };
 
-// ═══════════════════════════════════════════════════════════
-//  STORAGE  —  overrides are NOW "additional variants", not replacements
-// ═══════════════════════════════════════════════════════════
+// Greek letters → { roman, word }
+// Upper and lowercase map to the same output
+const GREEK_MAP = {
+  "\u0391":"alpha","\u03B1":"alpha", // Α α
+  "\u0392":"beta", "\u03B2":"beta",  // Β β
+  "\u0393":"gamma","\u03B3":"gamma", // Γ γ
+  "\u0394":"delta","\u03B4":"delta", // Δ δ
+  "\u0395":"epsilon","\u03B5":"epsilon", // Ε ε
+  "\u0396":"zeta", "\u03B6":"zeta",  // Ζ ζ
+  "\u0397":"eta",  "\u03B7":"eta",   // Η η
+  "\u0398":"theta","\u03B8":"theta", // Θ θ
+  "\u0399":"iota", "\u03B9":"iota",  // Ι ι
+  "\u039A":"kappa","\u03BA":"kappa", // Κ κ
+  "\u039B":"lambda","\u03BB":"lambda",// Λ λ
+  "\u039C":"mu",   "\u03BC":"mu",    // Μ μ
+  "\u039D":"nu",   "\u03BD":"nu",    // Ν ν
+  "\u039E":"xi",   "\u03BE":"xi",    // Ξ ξ
+  "\u039F":"omicron","\u03BF":"omicron",// Ο ο
+  "\u03A0":"pi",   "\u03C0":"pi",    // Π π
+  "\u03A1":"rho",  "\u03C1":"rho",   // Ρ ρ
+  "\u03A3":"sigma","\u03C3":"sigma","\u03C2":"sigma", // Σ σ ς
+  "\u03A4":"tau",  "\u03C4":"tau",   // Τ τ
+  "\u03A5":"upsilon","\u03C5":"upsilon",// Υ υ
+  "\u03A6":"phi",  "\u03C6":"phi",   // Φ φ
+  "\u03A7":"chi",  "\u03C7":"chi",   // Χ χ
+  "\u03A8":"psi",  "\u03C8":"psi",   // Ψ ψ
+  "\u03A9":"omega","\u03C9":"omega", // Ω ω
+};
+
+// Greek romanization (traditional Latin transliteration per spec)
+const GREEK_ROMAN = {
+  "alpha":"a","beta":"b","gamma":"g","delta":"d","epsilon":"e",
+  "zeta":"z","eta":"e","theta":"th","iota":"i","kappa":"k",
+  "lambda":"l","mu":"m","nu":"n","xi":"x","omicron":"o",
+  "pi":"p","rho":"r","sigma":"s","tau":"t","upsilon":"y",
+  "phi":"ph","chi":"kh","psi":"ps","omega":"o",
+};
+
+const GREEK_CHARS = new Set(Object.keys(GREEK_MAP));
 
 // Structure: { "007": ["double-o-seven"], "word": ["extra1","extra2"] }
 function getOverrides() {
@@ -480,13 +696,24 @@ function renderOverrides() {
 //  0 = both  1 = word-form only  2 = digit-by-digit only
 // ═══════════════════════════════════════════════════════════
 
-let numMode = 0;
+let numMode   = 0;
+let greekMode = 0; // 0=both 1=roman-only 2=word-only
 
 function setNumMode(mode) {
   numMode = mode;
-  [0, 1, 2].forEach(i => {
-    document.getElementById("nmOpt" + i).classList.toggle("selected", i === mode);
-  });
+  [0,1,2].forEach(i => document.getElementById("nmOpt"+i).classList.toggle("selected", i===mode));
+}
+
+function setGreekMode(mode) {
+  greekMode = mode;
+  [0,1,2].forEach(i => document.getElementById("grOpt"+i).classList.toggle("selected", i===mode));
+}
+
+function switchSettingsTab(name, btn) {
+  document.querySelectorAll(".settings-tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".settings-tab-panel").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("stab-"+name).classList.add("active");
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -597,7 +824,9 @@ function tokenize(raw) {
       continue;
     }
     if (isLetter(c)) { tokens.push({ t: "letter", v: c }); i++; continue; }
-    if (c === "-")   { tokens.push({ t: "hyphen", v: "-" }); i++; continue; }
+    if (c === "-" || c === "\u2013" || c === "\u2014") {
+      tokens.push({ t: "hyphen", v: "-" }); i++; continue;
+    }
     // All apostrophe variants normalize to standard apostrophe
     if ("'\u2019\u2018\u02BC\u0060\u02BB\u2032".includes(c)) {
       tokens.push({ t: "apostrophe", v: "'" }); i++; continue;
@@ -607,6 +836,12 @@ function tokenize(raw) {
       while (i < s.length && s[i] === c) { run += c; i++; }
       tokens.push({ t: "punct", ch: c, count: run.length, v: run });
       continue;
+    }
+    if (GREEK_CHARS.has(c)) {
+      const wordName = GREEK_MAP[c];
+      const roman    = GREEK_ROMAN[wordName];
+      tokens.push({ t: "greek", v: c, word: wordName, roman });
+      i++; continue;
     }
     if (CURRENCY_CHARS.has(c)) {
       tokens.push({ t: "currency", v: c, word: CURRENCY_MAP[c] });
@@ -693,7 +928,27 @@ function buildSegments(tokens) {
       continue;
     }
 
-    // ── Digit run ──
+    // ── Greek ──
+    if (tk.t === "greek") {
+      const prev = tokens[i - 1];
+      const next = tokens[i + 1];
+      if (!atStart && prev && (prev.t === "letter" || prev.t === "currency" || prev.t === "greek")) {
+        push([""], true, false);
+      }
+      // Produce alts based on greekMode — tagged with greekBranch for filtering
+      const roman    = tk.roman;
+      const wordName = tk.word;
+      if (roman === wordName) {
+        // Same value either way (rare edge case) — just one alt
+        segs.push({ alts: [roman], isH: false, isMerg: false });
+      } else {
+        segs.push({ alts: [roman, wordName], isH: false, isMerg: false, greekBranch: true });
+      }
+      if (!atEnd && next && (next.t === "letter" || next.t === "currency" || next.t === "greek")) {
+        push([""], true, false);
+      }
+      continue;
+    }
     if (tk.t === "digit-run") {
       const prev = tokens[i - 1];
       const next = tokens[i + 1];
@@ -938,9 +1193,8 @@ function assembleVariants(segs) {
   // Find which seg indices are number-branching segments (have both digit and word form)
   // These are segs where alts has 2 entries and one came from a digit-run with fullForm
   // We tag them during buildSegments by adding a numBranch flag
-  const numBranchIndices = new Set(
-    segs.map((s, i) => s.numBranch ? i : -1).filter(i => i >= 0)
-  );
+  const numBranchIndices   = new Set(segs.map((s,i)=>s.numBranch   ? i : -1).filter(i=>i>=0));
+  const greekBranchIndices = new Set(segs.map((s,i)=>s.greekBranch ? i : -1).filter(i=>i>=0));
 
   // Clean segs: extract unreg/overBillion markers, replace with ""
   const cleanSegs = segs.map(seg => {
@@ -964,21 +1218,31 @@ function assembleVariants(segs) {
     if (str.length === 0 || seen.has(str)) continue;
     seen.add(str);
 
-    // Determine numType by checking whether any numBranch seg used index 0 (digit) or 1 (word)
+    // Determine numType
     let numType = "none";
     for (const idx of numBranchIndices) {
       if (idx >= combo.length) continue;
-      const val = combo[idx];
-      const seg = cleanSegs[idx];
+      const val = combo[idx]; const seg = cleanSegs[idx];
       if (seg.alts.length >= 2) {
-        // index 0 = digit form, index 1 = word form
-        const choiceIdx = seg.alts.indexOf(val);
-        if (choiceIdx === 0) { numType = "digit"; break; }
-        if (choiceIdx === 1) { numType = "word";  break; }
+        const ci = seg.alts.indexOf(val);
+        if (ci === 0) { numType = "digit"; break; }
+        if (ci === 1) { numType = "word";  break; }
       }
     }
 
-    variants.push({ text: str, numType });
+    // Determine greekType
+    let greekType = "none";
+    for (const idx of greekBranchIndices) {
+      if (idx >= combo.length) continue;
+      const val = combo[idx]; const seg = cleanSegs[idx];
+      if (seg.alts.length >= 2) {
+        const ci = seg.alts.indexOf(val);
+        if (ci === 0) { greekType = "roman"; break; }
+        if (ci === 1) { greekType = "word";  break; }
+      }
+    }
+
+    variants.push({ text: str, numType, greekType });
   }
 
   return { variants, unregChars: [...unregChars], overBillions: [...overBillions], capped };
@@ -1062,9 +1326,12 @@ function showInvalid(reason) {
 function showOutput({ variants, extraVariants, unregChars, overBillions, capped }) {
   // Filter variants by current number mode
   const filtered = variants.filter(v => {
-    if (numMode === 0) return true;                          // both
-    if (numMode === 1) return v.numType !== "digit";        // word form only (keep none + word)
-    if (numMode === 2) return v.numType !== "word";         // digit only (keep none + digit)
+    // Number filter
+    if (numMode === 1 && v.numType === "digit") return false;
+    if (numMode === 2 && v.numType === "word")  return false;
+    // Greek filter
+    if (greekMode === 1 && v.greekType === "word")  return false;
+    if (greekMode === 2 && v.greekType === "roman") return false;
     return true;
   });
 
@@ -1161,6 +1428,13 @@ function updateCount() {
   document.getElementById("charCount").textContent = `${len} char${len !== 1 ? "s" : ""}`;
 }
 
+function toggleRef(id, toggleEl) {
+  const list  = document.getElementById(id);
+  const arrow = toggleEl.querySelector(".ref-toggle-arrow");
+  const open  = list.classList.toggle("open");
+  arrow.classList.toggle("open", open);
+}
+
 function toggleInfo() {
   const body  = document.getElementById("infoBody");
   const arrow = document.getElementById("infoArrow");
@@ -1181,3 +1455,4 @@ updateCount();
 </script>
 </body>
 </html>
+
