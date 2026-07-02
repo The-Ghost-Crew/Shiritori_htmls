@@ -107,6 +107,40 @@
   .abbr-chip { background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px; padding: 1px 8px; font-size: 11px; color: var(--accent2); }
   .cap-warn { font-size: 11px; color: var(--warn); margin-top: 8px; }
 
+  /* ── Preserve case toggle ── */
+  .case-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .case-toggle-btn {
+    position: relative;
+    width: 36px;
+    height: 20px;
+    border-radius: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .case-toggle-btn.on { background: #0d2a1a; border-color: var(--ok); }
+  .case-toggle-knob {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: left 0.15s, background 0.15s;
+  }
+  .case-toggle-btn.on .case-toggle-knob { left: 18px; background: var(--ok); }
+  .case-toggle-label { font-size: 12px; color: var(--muted); }
+  .case-toggle-label span { color: var(--text); }
+
   /* ── Settings floating button ── */
   .settings-fab {
     position: fixed;
@@ -312,7 +346,7 @@
 
   <header>
     <div class="logo">Shiritori</div>
-    <h1>Normalizer <span style="font-size:0.55rem;font-weight:400;color:var(--muted);letter-spacing:0.15em;vertical-align:middle">VERSION 4</span></h1>
+    <h1>Normalizer <span style="font-size:0.55rem;font-weight:400;color:var(--muted);letter-spacing:0.15em;vertical-align:middle">VERSION 5</span></h1>
     <div class="tagline">Converts words to spoken hyphenated form · a-z, hyphen, apostrophe only</div>
   </header>
 
@@ -324,6 +358,12 @@
       <button id="clearBtn">Clear</button>
       <button id="copyBtn" style="display:none">Copy all</button>
       <span class="char-count" id="charCount">0 chars</span>
+    </div>
+    <div class="case-toggle-row">
+      <button class="case-toggle-btn" id="caseToggleBtn" onclick="toggleCase()">
+        <div class="case-toggle-knob"></div>
+      </button>
+      <span class="case-toggle-label"><span>Preserve casing</span> — letters keep their original case, normalized segments stay lowercase</span>
     </div>
   </div>
 
@@ -696,8 +736,15 @@ function renderOverrides() {
 //  0 = both  1 = word-form only  2 = digit-by-digit only
 // ═══════════════════════════════════════════════════════════
 
-let numMode   = 0;
-let greekMode = 0; // 0=both 1=roman-only 2=word-only
+let numMode     = 0;
+let greekMode   = 0;
+let preserveCase = false;
+
+function toggleCase() {
+  preserveCase = !preserveCase;
+  const btn = document.getElementById("caseToggleBtn");
+  btn.classList.toggle("on", preserveCase);
+}
 
 function setNumMode(mode) {
   numMode = mode;
@@ -812,18 +859,23 @@ const CURRENCY_CHARS = new Set(Object.keys(CURRENCY_MAP));
 // ═══════════════════════════════════════════════════════════
 
 function tokenize(raw) {
-  const s = stripDiacritics(raw).toLowerCase();
+  const s    = stripDiacritics(raw).toLowerCase();
+  const orig = stripDiacritics(raw); // original case preserved
   const tokens = [];
   let i = 0;
   while (i < s.length) {
     const c = s[i];
     if (isDigit(c)) {
-      let run = "";
-      while (i < s.length && isDigit(s[i])) { run += s[i]; i++; }
+      let run = "", orun = "";
+      while (i < s.length && isDigit(s[i])) { run += s[i]; orun += orig[i]; i++; }
       tokens.push({ t: "digit-run", v: run });
       continue;
     }
-    if (isLetter(c)) { tokens.push({ t: "letter", v: c }); i++; continue; }
+    if (isLetter(c)) {
+      // Store both lowercase and original-case versions
+      tokens.push({ t: "letter", v: c, vOrig: orig[i] });
+      i++; continue;
+    }
     if (c === "-" || c === "\u2013" || c === "\u2014") {
       tokens.push({ t: "hyphen", v: "-" }); i++; continue;
     }
@@ -868,18 +920,31 @@ const BNAMES = {
 function labelBrackets(tokens) {
   const result = tokens.map((tk, idx) => ({ ...tk, idx, paired: false, pairIdx: -1 }));
   const stack = { "(": [], "[": [], "{": [] };
+
   for (let i = 0; i < result.length; i++) {
     const tk = result[i];
     if (tk.t !== "punct") continue;
     const ch = tk.ch;
+
     if (ch in OPEN_CLOSE) {
-      stack[ch].push(i);
+      // Push this token index once per bracket in the run
+      for (let p = 0; p < tk.count; p++) stack[ch].push(i);
     } else if (ch in CLOSE_OPEN) {
       const opener = CLOSE_OPEN[ch];
-      if (stack[opener] && stack[opener].length > 0) {
-        const oi = stack[opener].pop();
-        result[oi].paired = true; result[oi].pairIdx = i;
-        result[i].paired  = true; result[i].pairIdx = oi;
+      // Pop once per bracket in this closer run — pair each one
+      let pairedCount = 0;
+      for (let p = 0; p < tk.count; p++) {
+        if (stack[opener].length > 0) {
+          const oi = stack[opener].pop();
+          result[oi].paired    = true;
+          result[oi].pairedCount = (result[oi].pairedCount || 0) + 1;
+          pairedCount++;
+        }
+      }
+      if (pairedCount > 0) {
+        result[i].paired      = true;
+        result[i].pairedCount = pairedCount;
+        result[i].pairIdx     = -1; // multiple, not tracked to one index
       }
     }
   }
@@ -909,7 +974,7 @@ function buildSegments(tokens) {
     const atStart = i === 0;
     const atEnd   = i === n - 1;
 
-    if (tk.t === "letter")     { push([tk.v]); continue; }
+    if (tk.t === "letter")     { segs.push({ alts: [tk.v], altOrig: tk.vOrig, isH: false, isMerg: false }); continue; }
     if (tk.t === "apostrophe") { push(["'"]); continue; }
     if (tk.t === "unknown")    { push([{ unreg: tk.v }]); continue; }
 
@@ -1053,15 +1118,30 @@ function buildSegments(tokens) {
     if ("([{)]}".includes(ch)) {
       const isOpener = ch in OPEN_CLOSE;
       const name = BNAMES[ch];
+      const paired   = tk.pairedCount || 0;   // how many in this run were paired
+      const unpaired = tk.count - paired;      // how many were not
+
       if (tk.paired) {
-        // The WHOLE run (all `count` chars) is paired as one unit → 1 hyphen.
-        // Ignored at word edges.
-        if (atStart || atEnd) continue;
-        push([""], true, false);
+        // At least some are paired
+        if (paired > 0) {
+          // Paired ones → 1 hyphen (regardless of count), unless at edge
+          if (!atStart && !atEnd) push([""], true, false);
+        }
+        if (unpaired > 0) {
+          // Unpaired remainder → each becomes its name
+          if (atStart && isOpener) {
+            // ignore unpaired openers at start
+          } else if (atEnd && !isOpener) {
+            // ignore unpaired closers at end
+          } else {
+            for (let p = 0; p < unpaired; p++) {
+              if (p > 0 || paired > 0) push([""], true, false);
+              push([name]);
+            }
+          }
+        }
       } else {
-        // Unpaired run: each individual char becomes its own name segment.
-        // Opener runs at word start → ignored entirely.
-        // Closer runs at word end → ignored entirely.
+        // Fully unpaired run
         if (atStart && isOpener) continue;
         if (atEnd   && !isOpener) continue;
         for (let p = 0; p < count; p++) {
@@ -1120,7 +1200,9 @@ function assembleCombo(combo, segs) {
       if (seg.isMerg)  return { kind: "mergH" };
       return { kind: "genH" };
     }
-    return { kind: "text", val };
+    // Use original-case value for letter segments when preserveCase is on
+    const displayVal = (preserveCase && seg.altOrig !== undefined) ? seg.altOrig : val;
+    return { kind: "text", val: displayVal };
   });
 
   // Pass 1: collapse runs of hyphen tags into a single resolved hyphen string.
@@ -1455,4 +1537,3 @@ updateCount();
 </script>
 </body>
 </html>
-
