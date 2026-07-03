@@ -18,10 +18,10 @@
     --paper: #f3f0e8;
     --led: #7ee08a;
     --led-hot: #ff6b57;
+    --green: #4fdc6a;
   }
 
   * { box-sizing: border-box; }
-
   html, body { height: 100%; }
 
   body {
@@ -33,8 +33,22 @@
     background: radial-gradient(circle at 50% 20%, #3a3a3a, #121212 70%);
     font-family: 'Space Grotesk', sans-serif;
     padding: 32px 16px;
-    overflow: hidden;
+    position: relative;
   }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--screen);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+
+  .backdrop.active { opacity: 1; }
+
+  /* ---------- console ---------- */
 
   .console {
     width: 340px;
@@ -67,9 +81,7 @@
     box-shadow: 0 0 10px 3px var(--led-hot);
   }
 
-  .console.running {
-    transform: scale(1.22);
-  }
+  .console.running { transform: scale(1.22); }
 
   @keyframes shake {
     0%, 100% { transform: scale(1.22) translateX(0); }
@@ -81,19 +93,10 @@
     90% { transform: scale(1.22) translateX(4px); }
   }
 
-  .console.shake {
-    animation: shake 0.6s ease;
-  }
+  .console.shake { animation: shake 0.6s ease; }
 
-  .fade-part {
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
-
-  .console.running .fade-part {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
+  .fade-part { transition: opacity 0.3s ease, visibility 0.3s ease; }
+  .console.running .fade-part { opacity: 0; visibility: hidden; pointer-events: none; }
 
   .brand-row {
     display: flex;
@@ -102,19 +105,19 @@
     padding: 0 4px 14px;
   }
 
-  .brand {
-    font-size: 11px;
-    letter-spacing: 0.14em;
-    color: #9a9a9a;
-    text-transform: uppercase;
-  }
-
+  .brand { font-size: 11px; letter-spacing: 0.14em; color: #9a9a9a; text-transform: uppercase; }
   .brand strong { color: #eaeaea; }
 
   .screen {
     background: var(--screen);
     border-radius: 10px;
-    padding: 22px 16px 26px;
+    padding: 20px 14px;
+    min-height: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    gap: 4px;
     box-shadow:
       inset 0 3px 10px rgba(0,0,0,0.35),
       inset 0 0 0 6px #263314;
@@ -147,23 +150,26 @@
 
   .title {
     font-family: 'Press Start 2P', monospace;
-    font-size: 16px;
+    font-size: 14px;
     color: var(--screen-dark);
     text-align: center;
-    line-height: 1.6;
-    margin: 10px 0 18px;
+    line-height: 1.5;
+    margin: 6px 0 10px;
     text-shadow: 0 1px 0 rgba(255,255,255,0.15);
   }
 
-  .timer {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 40px;
-    color: var(--screen-dark);
+  .status-row {
     text-align: center;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 0 rgba(255,255,255,0.12);
-    margin-bottom: 6px;
-    white-space: nowrap;
+    min-height: 12px;
+    margin-bottom: 4px;
+  }
+
+  .status-chip {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: var(--green);
+    display: none;
+    text-shadow: 0 0 4px rgba(79,220,106,0.6);
   }
 
   .timer-label {
@@ -176,8 +182,23 @@
     margin-bottom: 4px;
   }
 
+  .timer {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 38px;
+    color: var(--screen-dark);
+    text-align: center;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.12);
+    white-space: nowrap;
+  }
+
+  .timer.medium { font-size: 26px; letter-spacing: 0.5px; }
+  .timer.long { font-size: 16px; letter-spacing: 0; }
+
+  /* ---------- controls ---------- */
+
   .controls {
-    padding: 26px 6px 4px;
+    padding: 24px 6px 4px;
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -195,23 +216,12 @@
     font-size: 16px;
     letter-spacing: 0.03em;
     cursor: pointer;
-    box-shadow:
-      0 4px 0 #7c2a12,
-      0 8px 16px rgba(228,87,46,0.35);
+    box-shadow: 0 4px 0 #7c2a12, 0 8px 16px rgba(228,87,46,0.35);
     transition: transform 0.08s ease, box-shadow 0.08s ease;
   }
 
-  .start-btn:active {
-    transform: translateY(4px);
-    box-shadow:
-      0 0 0 #7c2a12,
-      0 4px 10px rgba(228,87,46,0.3);
-  }
-
-  .start-btn:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
+  .start-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #7c2a12, 0 4px 10px rgba(228,87,46,0.3); }
+  .start-btn:disabled { opacity: 0.5; cursor: default; }
 
   .ghost-btn {
     width: 100%;
@@ -231,12 +241,7 @@
     transition: background 0.15s ease, border-color 0.15s ease;
   }
 
-  .ghost-btn:hover {
-    background: #363636;
-    border-color: #666;
-  }
-
-  .ghost-btn svg { flex-shrink: 0; }
+  .ghost-btn:hover { background: #363636; border-color: #666; }
 
   .footer-note {
     text-align: center;
@@ -245,26 +250,286 @@
     margin-top: 18px;
     letter-spacing: 0.04em;
   }
+
+  /* ---------- effect feed ---------- */
+
+  .feed {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 5;
+  }
+
+  .feed-item {
+    background: rgba(35,35,35,0.92);
+    border: 1px solid #444;
+    border-left: 3px solid var(--green);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    color: #e2e2e2;
+    animation: feedIn 0.25s ease;
+  }
+
+  .feed-item .fx-time {
+    display: block;
+    font-size: 9px;
+    color: #8fbf99;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+
+  .feed-item {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .feed-item.fading {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+
+  @keyframes feedIn {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @media (max-width: 720px) {
+    .feed { top: auto; bottom: 16px; right: 16px; left: 16px; width: auto; }
+  }
+
+  /* ---------- modal (catalog) ---------- */
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    padding: 20px;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--shell);
+    border: 1px solid var(--shell-edge);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 18px;
+    border-bottom: 1px solid #3a3a3a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: #eaeaea;
+  }
+
+  .modal-header button {
+    background: none;
+    border: none;
+    color: #cfcfcf;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .modal-body {
+    overflow-y: auto;
+    padding: 12px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .fx-card {
+    background: #2a2a2a;
+    border: 1px solid #3d3d3d;
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .fx-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .fx-name { font-weight: 700; font-size: 13px; color: #eaeaea; }
+  .fx-chance { font-size: 12px; color: var(--green); font-weight: 700; white-space: nowrap; }
+  .fx-desc { font-size: 12px; color: #b7b7b7; line-height: 1.4; }
+
+  .catalog-note {
+    font-size: 11px;
+    color: #8a8a8a;
+    padding: 0 4px 4px;
+    line-height: 1.4;
+  }
+
+  /* ---------- blackout ---------- */
+
+  .blackout {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 30;
+    display: none;
+    opacity: 0;
+  }
+
+  .blackout.active {
+    display: block;
+    animation: blackoutFlicker 0.5s steps(1, end) forwards;
+  }
+
+  @keyframes blackoutFlicker {
+    0%   { opacity: 0; }
+    8%   { opacity: 1; }
+    16%  { opacity: 0.15; }
+    24%  { opacity: 1; }
+    32%  { opacity: 0.25; }
+    40%  { opacity: 1; }
+    55%  { opacity: 0.1; }
+    70%  { opacity: 1; }
+    100% { opacity: 1; }
+  }
+
+  .finish-flash {
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    z-index: 35;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .finish-flash.active {
+    animation: finishFlash 0.9s ease-out forwards;
+  }
+
+  @keyframes finishFlash {
+    0%   { opacity: 0; }
+    8%   { opacity: 0.85; background: #ffffff; }
+    16%  { opacity: 0; }
+    24%  { opacity: 0.6; background: #e4572e; }
+    32%  { opacity: 0; }
+    42%  { opacity: 0.4; background: #ffffff; }
+    100% { opacity: 0; }
+  }
+
+  /* ---------- toast ---------- */
+
+  .toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #b5411e;
+    color: var(--paper);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 40;
+    text-align: center;
+    max-width: 280px;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- game over ---------- */
+
+  .gameover-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+  }
+
+  .gameover-overlay.active { display: flex; }
+
+  .gameover-card {
+    background: linear-gradient(160deg, #3a1710, #1a0b08);
+    border: 1px solid #6b2a1a;
+    border-radius: 18px;
+    padding: 28px 24px;
+    max-width: 340px;
+    text-align: center;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+  }
+
+  .gameover-card h2 {
+    font-family: 'Press Start 2P', monospace;
+    color: var(--red);
+    font-size: 20px;
+    margin: 0 0 14px;
+    text-shadow: 0 0 12px rgba(228,87,46,0.6);
+  }
+
+  .gameover-card p {
+    color: #d8c9c4;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 20px;
+  }
+
+  .reset-btn {
+    background: linear-gradient(180deg, var(--red), var(--red-dark));
+    color: var(--paper);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
 
+  <div class="backdrop" id="backdrop"></div>
+
   <div class="console" id="console">
     <div class="brand-row fade-part">
       <span class="brand"><strong>JUST</strong> 10 MINUTES</span>
-      <span class="brand">V0.1</span>
+      <span class="brand">V0.3</span>
     </div>
 
     <div class="screen">
       <div class="eyebrow">FOCUS SESSION</div>
       <div class="title">JUST<br>10 MINUTES</div>
+      <div class="status-row">
+        <span class="status-chip" id="speedIndicator"></span>
+      </div>
       <div class="timer-label" id="timerLabel">Ready to begin</div>
       <div class="timer" id="timerDisplay">10:00</div>
     </div>
 
     <div class="controls fade-part">
       <button class="start-btn" id="startBtn" type="button">START 10 MINUTE TIMER</button>
-      <button class="ghost-btn" type="button">
+      <button class="ghost-btn" id="catalogBtn" type="button">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
           <path d="M2 17l10 5 10-5"></path>
@@ -277,56 +542,528 @@
     <div class="footer-note fade-part">TAP START TO BEGIN</div>
   </div>
 
+  <div class="feed" id="feed"></div>
+
+  <div class="modal-overlay" id="catalogOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        EFFECTS CATALOG
+        <button id="closeCatalog" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="catalog-note">Only one effect (or none) can fire per tick. Each tick rolls once against these percentages as slices of a single draw — leftover probability means nothing happens. Keep the total under 100%, or effects lower on this list can become unreachable.</div>
+        <div id="catalogList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blackout" id="blackout"></div>
+  <div class="finish-flash" id="finishFlash"></div>
+  <div class="toast" id="toast"></div>
+
+  <div class="gameover-overlay" id="gameOverOverlay">
+    <div class="gameover-card">
+      <h2>TIMER ERROR</h2>
+      <p id="gameOverStats"></p>
+      <button class="reset-btn" id="resetBtn" type="button">RESET</button>
+    </div>
+  </div>
+
   <script>
+    // ---------- elements ----------
     const consoleEl = document.getElementById('console');
     const startBtn = document.getElementById('startBtn');
+    const catalogBtn = document.getElementById('catalogBtn');
     const timerDisplay = document.getElementById('timerDisplay');
     const timerLabel = document.getElementById('timerLabel');
+    const speedIndicator = document.getElementById('speedIndicator');
+    const backdropEl = document.getElementById('backdrop');
+    const feedEl = document.getElementById('feed');
+    const catalogOverlay = document.getElementById('catalogOverlay');
+    const catalogList = document.getElementById('catalogList');
+    const closeCatalog = document.getElementById('closeCatalog');
+    const blackoutEl = document.getElementById('blackout');
+    const finishFlashEl = document.getElementById('finishFlash');
+    const toastEl = document.getElementById('toast');
 
-    const TOTAL_SECONDS = 600;
-    let remaining = TOTAL_SECONDS;
-    let intervalId = null;
-
-    function formatTime(seconds) {
-      const m = Math.floor(seconds / 60);
-      const s = seconds % 60;
-      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    // ---------- sound & haptics ----------
+    // AudioContext must be created/resumed from a user gesture (the Start
+    // tap) or mobile browsers will silently block it.
+    let audioCtx = null;
+    function ensureAudio() {
+      if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        catch (e) { audioCtx = null; }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    function startTimer() {
-      if (intervalId) return;
+    function tone(freq, type, startOffset, duration, peakGain) {
+      if (!audioCtx) return;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const t = audioCtx.currentTime + startOffset;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(peakGain, t + Math.min(0.01, duration / 3));
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + duration + 0.02);
+    }
+
+    // Skipped entirely once ticks are faster than ~300ms, otherwise it turns
+    // into a buzz instead of a countdown tick.
+    function playTick() {
+      if (currentInterval() < 300) return;
+      tone(880, 'sine', 0, 0.05, 0.06);
+    }
+
+    function playFinishAlarm() {
+      [660, 660, 660, 880].forEach((f, i) => tone(f, 'square', i * 0.18, 0.15, 0.12));
+    }
+
+    function vibrateFinish() {
+      if (navigator.vibrate) navigator.vibrate([150, 80, 150, 80, 300]);
+    }
+
+    function flashFinish() {
+      finishFlashEl.classList.remove('active');
+      void finishFlashEl.offsetWidth;
+      finishFlashEl.classList.add('active');
+    }
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const gameOverStats = document.getElementById('gameOverStats');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // ---------- time helpers ----------
+    // mixed-radix seconds -> {century, decade, year, month, week, day, hour, minute, second}
+    // caps: sec/min <60, hour <24, day <7, week <4, month <12, year <10, decade <10
+    // century reaching 2 = game over ("TIMER ERROR")
+    function decompose(total) {
+      let v = Math.max(0, Math.floor(total));
+      const second = v % 60; v = Math.floor(v / 60);
+      const minute = v % 60; v = Math.floor(v / 60);
+      const hour = v % 24; v = Math.floor(v / 24);
+      const day = v % 7; v = Math.floor(v / 7);
+      const week = v % 4; v = Math.floor(v / 4);
+      const month = v % 12; v = Math.floor(v / 12);
+      const year = v % 10; v = Math.floor(v / 10);
+      const decade = v % 10; v = Math.floor(v / 10);
+      const century = v;
+      return { century, decade, year, month, week, day, hour, minute, second };
+    }
+
+    function recompose(u) {
+      let t = u.century;
+      t = t * 10 + u.decade;
+      t = t * 10 + u.year;
+      t = t * 12 + u.month;
+      t = t * 4 + u.week;
+      t = t * 7 + u.day;
+      t = t * 24 + u.hour;
+      t = t * 60 + u.minute;
+      t = t * 60 + u.second;
+      return t;
+    }
+
+    function formatTime(total) {
+      const u = decompose(total);
+      const order = ['century', 'decade', 'year', 'month', 'week', 'day'];
+      const labels = { century: 'C', decade: 'Dc', year: 'Y', month: 'Mo', week: 'W', day: 'D' };
+      const startIdx = order.findIndex(k => u[k] > 0);
+      let prefix = '';
+      if (startIdx !== -1) {
+        prefix = order.slice(startIdx).map(k => labels[k] + u[k]).join(' ') + '  ';
+      }
+      const showHour = u.hour > 0 || startIdx !== -1;
+      const hh = showHour ? String(u.hour).padStart(2, '0') + ':' : '';
+      const mm = String(u.minute).padStart(2, '0');
+      const ss = String(u.second).padStart(2, '0');
+      // tier 0 = mm:ss, tier 1 = h:mm:ss, tier 2 = bigger denominations + h:mm:ss
+      const tier = prefix.length > 0 ? 2 : (showHour ? 1 : 0);
+      return { text: prefix + hh + mm + ':' + ss, tier };
+    }
+
+    // ---------- state ----------
+    const BASE_INTERVAL = 1000;
+    const MIN_INTERVAL = 120;   // readability floor: below this, effects blur together
+    const MAX_INTERVAL = 4000;  // ceiling so "slow" never fully stalls the game
+    const MAX_STACK = 10;       // fast/slow each cap at 10 stacks; further triggers do nothing
+    const START_SECONDS = 600;
+
+    const state = {
+      total: START_SECONDS,
+      speedStack: 0, // -10 (max slow) .. +10 (max fast), single net counter
+      frozenTicks: 0,
+      blackoutTicks: 0,
+      running: false,
+      gameOver: false,
+      tickHandle: null,
+    };
+
+    let feedEvents = [];
+    let feedCounter = 0;
+
+    // Fast and slow stacks are netted into one exponent, then clamped to a
+    // human-readable range. Each tick always removes exactly 1 game-second;
+    // only how much *real* time that takes changes.
+    function currentInterval() {
+      const raw = BASE_INTERVAL / Math.pow(2, state.speedStack);
+      return Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, raw));
+    }
+
+    // ---------- effects ----------
+    function shuffleDigits() {
+      const u = decompose(state.total);
+      const order = ['century', 'decade', 'year', 'month', 'week', 'day', 'hour', 'minute', 'second'];
+      const maxes = { century: Infinity, decade: 9, year: 9, month: 11, week: 3, day: 6, hour: 23, minute: 59, second: 59 };
+      let topIdx = order.findIndex(k => u[k] > 0);
+      if (topIdx === -1 || topIdx > order.length - 2) topIdx = order.length - 2;
+      const activeKeys = order.slice(topIdx);
+      const values = activeKeys.map(k => u[k]);
+      for (let i = values.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [values[i], values[j]] = [values[j], values[i]];
+      }
+      const newU = { ...u };
+      activeKeys.forEach((k, i) => {
+        const max = maxes[k];
+        newU[k] = max === Infinity ? values[i] : Math.min(values[i], max);
+      });
+      state.total = recompose(newU);
+      return 'Digits shuffled';
+    }
+
+    function speedLabel() {
+      if (state.speedStack === 0) return null;
+      const ms = currentInterval();
+      const effectiveMultiplier = Math.round((BASE_INTERVAL / ms) * 100) / 100;
+      const stackDisplay = Math.abs(state.speedStack);
+      const dir = state.speedStack > 0 ? 'FAST' : 'SLOW';
+      return `${dir} \u00d7${effectiveMultiplier} (${stackDisplay}/${MAX_STACK}) (${Math.round(ms)}ms/tick)`;
+    }
+
+    // Palindrome check runs on the plain minute:second reading (ignores any
+    // hour+ prefix — those only show up in rare stacked-time edge cases).
+    function isPalindromeMMSS(total) {
+      const u = decompose(total);
+      const s = String(u.minute).padStart(2, '0') + ':' + String(u.second).padStart(2, '0');
+      return s === s.split('').reverse().join('');
+    }
+
+    function nearestPalindrome(total) {
+      for (let d = 0; d <= 3600; d++) {
+        if (total - d >= 0 && isPalindromeMMSS(total - d)) return total - d;
+        if (isPalindromeMMSS(total + d)) return total + d;
+      }
+      return total;
+    }
+
+    let lastAppliedEffectId = null;
+
+    const EFFECTS = [
+      { id: 'plus1s', name: '+1 Second', chance: 0.12, desc: 'Adds one second to the clock.',
+        apply() { state.total += 1; return '+1 second'; } },
+      { id: 'plus1m', name: '+1 Minute', chance: 0.08, desc: 'Adds one minute to the clock.',
+        apply() { state.total += 60; return '+1 minute'; } },
+      { id: 'minus1m', name: '-1 Minute', chance: 0.08, desc: 'Removes one minute from the clock.',
+        apply() { state.total = Math.max(0, state.total - 60); return '-1 minute'; } },
+      { id: 'freeze', name: 'Freeze (5 ticks)', chance: 0.05, desc: 'Freezes the countdown and effect rolls for 5 ticks. Real duration follows the current speed.',
+        apply() { state.frozenTicks += 5; return 'Frozen for 5 ticks'; } },
+      { id: 'double', name: 'Double Time', chance: 0.02, desc: 'Doubles the remaining time.',
+        apply() { state.total = Math.round(state.total * 2); return 'Time doubled'; } },
+      { id: 'halve', name: 'Halve Time', chance: 0.02, desc: 'Halves the remaining time.',
+        apply() { state.total = Math.max(0, Math.round(state.total / 2)); return 'Time halved'; } },
+      { id: 'swap', name: 'Minute/Second Swap', chance: 0.03, desc: 'Swaps minutes and seconds. Anything above the minutes place is erased. e.g. 02:33 becomes 33:02.',
+        apply() { const u = decompose(state.total); state.total = u.second * 60 + u.minute; return 'Minutes & seconds swapped'; } },
+      { id: 'round', name: 'Round to Minute', chance: 0.06, desc: 'Rounds the clock to the nearest whole minute, up or down.',
+        apply() { state.total = Math.round(state.total / 60) * 60; return 'Rounded to nearest minute'; } },
+      { id: 'shuffle', name: 'Digit Shuffle', chance: 0.04, desc: 'Randomly rearranges the currently visible time units. Values are clamped to fit their new slot.',
+        apply() { return shuffleDigits(); } },
+      { id: 'fast', name: 'Second: 2x Faster', chance: 0.03, desc: `Pushes the net speed counter toward faster. Range is -${MAX_STACK} (max slow) to +${MAX_STACK} (max fast) — a fast roll cancels out slow stacking before it starts adding new speed.`,
+        apply() {
+          if (state.speedStack >= MAX_STACK) return 'Speed already maxed';
+          state.speedStack++;
+          return `Sped up (${Math.abs(state.speedStack)}/${MAX_STACK})`;
+        } },
+      { id: 'slow', name: 'Second: 2x Longer', chance: 0.03, desc: `Pushes the net speed counter toward slower. Range is -${MAX_STACK} (max slow) to +${MAX_STACK} (max fast) — a slow roll cancels out fast stacking before it starts adding new slowness.`,
+        apply() {
+          if (state.speedStack <= -MAX_STACK) return 'Slow already maxed';
+          state.speedStack--;
+          return `Slowed down (${Math.abs(state.speedStack)}/${MAX_STACK})`;
+        } },
+      { id: 'blackout', name: 'Power Outage', chance: 0.02, desc: 'Everything goes pitch black for 5 ticks (lights flicker before it fully cuts out). Timer is frozen during the outage. When power returns: +5 minutes.',
+        apply() { state.blackoutTicks = 5; blackoutEl.classList.remove('active'); void blackoutEl.offsetWidth; blackoutEl.classList.add('active'); return 'Power outage!'; } },
+      { id: 'coinflip', name: 'Coin Flip: \u00d73 / \u00f73', chance: 0.02, desc: 'The current second decides the call: even = heads (triples the time), odd = tails (cuts it to a third). No pause, no randomness beyond the clock itself.',
+        apply() {
+          const u = decompose(state.total);
+          const even = u.second % 2 === 0;
+          if (even) {
+            state.total = Math.round(state.total * 3);
+            return 'Coin flip: HEADS (even) \u2014 tripled';
+          }
+          state.total = Math.max(0, Math.round(state.total / 3));
+          return 'Coin flip: TAILS (odd) \u2014 cut to a third';
+        } },
+      { id: 'speedreset', name: 'Speed Reset', chance: 0.005, desc: 'Resets fast/slow stacking back to a normal 1 second = 1 second.',
+        apply() {
+          if (state.speedStack === 0) return 'Speed already normal';
+          state.speedStack = 0;
+          return 'Speed reset to normal';
+        } },
+      { id: 'palindrome', name: 'Palindrome Pull', chance: 0.03, desc: 'Pulls the clock to the nearest palindrome reading (e.g. 05:50, 12:21) — whichever is closer, up or down.',
+        apply() {
+          const before = state.total;
+          state.total = nearestPalindrome(state.total);
+          if (state.total === before) return 'Already a palindrome';
+          const u = decompose(state.total);
+          return `Pulled to palindrome ${String(u.minute).padStart(2,'0')}:${String(u.second).padStart(2,'0')}`;
+        } },
+      { id: 'echo', name: 'Echo', chance: 0.03, desc: 'Repeats whichever effect fired most recently. Does nothing if nothing has fired yet.',
+        apply() {
+          const source = EFFECTS.find(e => e.id === lastAppliedEffectId);
+          if (!source) return 'Echo: nothing to repeat yet';
+          const label = source.apply();
+          return `Echo: repeated "${source.name}" \u2014 ${label}`;
+        } },
+      { id: 'lucky7', name: 'Lucky Digit', chance: 0.04, desc: 'If a 7 appears anywhere in the current reading, +7 seconds. Otherwise this roll fizzles.',
+        apply() {
+          const u = decompose(state.total);
+          const shown = `${u.century}${u.decade}${u.year}${u.month}${u.week}${u.day}${u.hour}${u.minute}${u.second}`;
+          if (shown.includes('7')) { state.total += 7; return 'Lucky digit: 7 spotted \u2014 +7 seconds'; }
+          return 'Lucky digit: no 7 on screen \u2014 nothing happens';
+        } },
+    ];
+
+    function renderCatalog() {
+      catalogList.innerHTML = EFFECTS.map(fx => `
+        <div class="fx-card">
+          <div class="fx-card-top">
+            <span class="fx-name">${fx.name}</span>
+            <span class="fx-chance">${Math.round(fx.chance * 1000) / 10}%</span>
+          </div>
+          <div class="fx-desc">${fx.desc}</div>
+        </div>
+      `).join('');
+    }
+
+    // ---------- feed ----------
+    function logFeed(label) {
+      const id = ++feedCounter;
+      feedEvents.unshift({ id, time: formatTime(state.total).text.trim(), label });
+      feedEvents = feedEvents.slice(0, 5);
+      renderFeed();
+
+      setTimeout(() => {
+        const el = feedEl.querySelector(`[data-id="${id}"]`);
+        if (el) el.classList.add('fading');
+        setTimeout(() => {
+          feedEvents = feedEvents.filter(ev => ev.id !== id);
+          renderFeed();
+        }, 300);
+      }, 2000);
+    }
+
+    function renderFeed() {
+      feedEl.innerHTML = feedEvents.map(ev => `
+        <div class="feed-item" data-id="${ev.id}">
+          <span class="fx-time">AT ${ev.time}</span>${ev.label}
+        </div>
+      `).join('');
+    }
+
+    // ---------- display ----------
+    function updateDisplay() {
+      const f = formatTime(state.total);
+      timerDisplay.textContent = f.text;
+      timerDisplay.classList.toggle('medium', f.tier === 1);
+      timerDisplay.classList.toggle('long', f.tier === 2);
+    }
+
+    function updateStatusRow() {
+      const label = speedLabel();
+      if (label) {
+        speedIndicator.style.display = 'block';
+        speedIndicator.textContent = label;
+      } else {
+        speedIndicator.style.display = 'none';
+      }
+    }
+
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
+    // ---------- game loop ----------
+    // Exactly one effect (or none) per tick: single roll walks a cumulative
+    // range built from each effect's chance. Whatever slice the roll lands
+    // in is the only thing that fires. Leftover probability = "nothing happens".
+    // Keep the total of all chances under 100% or effects near the end of
+    // the list can become unreachable.
+    function rollEffects() {
+      const roll = Math.random();
+      let cumulative = 0;
+      for (const fx of EFFECTS) {
+        cumulative += fx.chance;
+        if (roll < cumulative) {
+          const label = fx.apply();
+          logFeed(label);
+          if (fx.id !== 'echo') lastAppliedEffectId = fx.id;
+          return;
+        }
+      }
+      // roll landed past every effect's slice -> no effect this tick
+    }
+
+    function checkOverflow() {
+      const u = decompose(state.total);
+      if (u.century >= 2) {
+        triggerGameOver(u);
+        return true;
+      }
+      return false;
+    }
+
+    function scheduleTick() {
+      state.tickHandle = setTimeout(runTick, currentInterval());
+    }
+
+    function runTick() {
+      if (state.gameOver || !state.running) return;
+
+      if (state.blackoutTicks > 0) {
+        state.blackoutTicks--;
+        if (state.blackoutTicks === 0) endBlackout();
+        scheduleTick();
+        return;
+      }
+
+      if (state.frozenTicks > 0) {
+        state.frozenTicks--;
+        scheduleTick();
+        return;
+      }
+
+      state.total = Math.max(0, state.total - 1);
+      updateDisplay();
+      updateStatusRow();
+      playTick();
+
+      if (state.total <= 0) {
+        finishTimer();
+        return;
+      }
+
+      rollEffects();
+      if (state.total <= 0) { finishTimer(); return; }
+      if (checkOverflow()) return;
+
+      updateDisplay();
+      scheduleTick();
+    }
+
+    function endBlackout() {
+      blackoutEl.classList.remove('active');
+      state.total += 300;
+      updateDisplay();
+      logFeed('Power restored (+5:00)');
+      showToast('AN ERROR OCCURRED \u2014 +5:00 ADDED');
+    }
+
+    // ---------- lifecycle ----------
+    function startGame() {
+      if (state.running) return;
+      ensureAudio();
+      state.total = START_SECONDS;
+      state.speedStack = 0;
+      state.frozenTicks = 0;
+      state.blackoutTicks = 0;
+      state.gameOver = false;
+      state.running = true;
+      feedEvents = [];
+      renderFeed();
+      updateDisplay();
+      updateStatusRow();
+
       startBtn.disabled = true;
       consoleEl.classList.add('running');
+      backdropEl.classList.add('active');
       timerLabel.textContent = 'In progress';
 
-      intervalId = setInterval(() => {
-        remaining -= 1;
-        timerDisplay.textContent = formatTime(remaining);
-
-        if (remaining <= 0) {
-          clearInterval(intervalId);
-          intervalId = null;
-          endTimer();
-        }
-      }, 1000);
+      scheduleTick();
     }
 
-    function endTimer() {
-      timerLabel.textContent = "Time's up";
+    function finishTimer() {
+      state.running = false;
+      clearTimeout(state.tickHandle);
+      timerLabel.textContent = "TIME'S UP";
       consoleEl.classList.add('shake');
+      playFinishAlarm();
+      vibrateFinish();
+      flashFinish();
 
       consoleEl.addEventListener('animationend', function handler() {
         consoleEl.removeEventListener('animationend', handler);
         consoleEl.classList.remove('shake');
         consoleEl.classList.remove('running');
-        remaining = TOTAL_SECONDS;
-        timerDisplay.textContent = formatTime(remaining);
+        backdropEl.classList.remove('active');
+        state.total = START_SECONDS;
+        state.speedStack = 0;
+        updateDisplay();
+        updateStatusRow();
         timerLabel.textContent = 'Ready to begin';
         startBtn.disabled = false;
       });
     }
 
-    startBtn.addEventListener('click', startTimer);
+    function triggerGameOver(u) {
+      state.running = false;
+      state.gameOver = true;
+      clearTimeout(state.tickHandle);
+      blackoutEl.classList.remove('active');
+      consoleEl.classList.remove('running');
+      backdropEl.classList.remove('active');
+      const reading = `C${u.century} Dc${u.decade} Y${u.year} Mo${u.month} W${u.week} D${u.day} ${String(u.hour).padStart(2,'0')}:${String(u.minute).padStart(2,'0')}:${String(u.second).padStart(2,'0')}`;
+      gameOverStats.textContent = `Final reading: ${reading}. That's a 2-century clock \u2014 screenshot this as your proof.`;
+      gameOverOverlay.classList.add('active');
+    }
+
+    function resetGame() {
+      gameOverOverlay.classList.remove('active');
+      blackoutEl.classList.remove('active');
+      backdropEl.classList.remove('active');
+      state.total = START_SECONDS;
+      state.speedStack = 0;
+      state.frozenTicks = 0;
+      state.blackoutTicks = 0;
+      state.gameOver = false;
+      state.running = false;
+      feedEvents = [];
+      renderFeed();
+      consoleEl.classList.remove('running', 'shake');
+      updateDisplay();
+      updateStatusRow();
+      timerLabel.textContent = 'Ready to begin';
+      startBtn.disabled = false;
+    }
+
+    // ---------- wiring ----------
+    startBtn.addEventListener('click', startGame);
+    resetBtn.addEventListener('click', resetGame);
+    catalogBtn.addEventListener('click', () => catalogOverlay.classList.add('active'));
+    closeCatalog.addEventListener('click', () => catalogOverlay.classList.remove('active'));
+    catalogOverlay.addEventListener('click', (e) => {
+      if (e.target === catalogOverlay) catalogOverlay.classList.remove('active');
+    });
+
+    renderCatalog();
+    updateDisplay();
   </script>
 
 </body>
