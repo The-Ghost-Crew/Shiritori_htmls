@@ -76,6 +76,18 @@
     transition: background 0.3s ease, box-shadow 0.3s ease;
   }
 
+  .run-stats {
+    font-size: 9px;
+    text-align: center;
+    color: var(--screen-dark);
+    opacity: 0.8;
+    line-height: 1.5;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .run-stats.visible { display: block; }
+
   .console.running::before {
     background: var(--led-hot);
     box-shadow: 0 0 10px 3px var(--led-hot);
@@ -137,7 +149,63 @@
       transparent 3px
     );
     pointer-events: none;
+    z-index: 1;
   }
+
+  .murder-badge {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--red);
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    display: none;
+    z-index: 2;
+  }
+
+  .screen-flash {
+    position: absolute;
+    inset: 0;
+    background: #ff2d2d;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .screen-flash.active {
+    animation: screenRedFlash 0.6s steps(1, end) forwards;
+  }
+
+  @keyframes screenRedFlash {
+    0%   { opacity: 0;    background: #ff2d2d; }
+    15%  { opacity: 0.85; }
+    30%  { opacity: 0.1;  background: #b5411e; }
+    45%  { opacity: 0.9;  background: #ff2d2d; }
+    60%  { opacity: 0.15; }
+    75%  { opacity: 0.8;  background: #7a0000; }
+    100% { opacity: 0; }
+  }
+
+  .murder-error {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    background: rgba(10, 0, 0, 0.85);
+    color: #ff5b4a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    letter-spacing: 0.05em;
+    z-index: 5;
+  }
+
+  .murder-error.active { display: flex; }
 
   .eyebrow {
     font-family: 'Press Start 2P', monospace;
@@ -381,13 +449,13 @@
     line-height: 1.4;
   }
 
-  /* ---------- blackout ---------- */
+  /* ---------- blackout (scoped to the LCD screen, not the whole page) ---------- */
 
   .blackout {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: #000;
-    z-index: 30;
+    z-index: 6;
     display: none;
     opacity: 0;
   }
@@ -514,10 +582,11 @@
   <div class="console" id="console">
     <div class="brand-row fade-part">
       <span class="brand"><strong>JUST</strong> 10 MINUTES</span>
-      <span class="brand">V0.3</span>
+      <span class="brand">V0.6</span>
     </div>
 
     <div class="screen">
+      <div class="murder-badge" id="murderBadge"></div>
       <div class="eyebrow">FOCUS SESSION</div>
       <div class="title">JUST<br>10 MINUTES</div>
       <div class="status-row">
@@ -525,6 +594,10 @@
       </div>
       <div class="timer-label" id="timerLabel">Ready to begin</div>
       <div class="timer" id="timerDisplay">10:00</div>
+      <div class="run-stats" id="runStats"></div>
+      <div class="screen-flash" id="screenFlash"></div>
+      <div class="murder-error" id="murderError">INTEGER<br>MISSING</div>
+      <div class="blackout" id="blackout"></div>
     </div>
 
     <div class="controls fade-part">
@@ -557,7 +630,6 @@
     </div>
   </div>
 
-  <div class="blackout" id="blackout"></div>
   <div class="finish-flash" id="finishFlash"></div>
   <div class="toast" id="toast"></div>
 
@@ -577,6 +649,10 @@
     const timerDisplay = document.getElementById('timerDisplay');
     const timerLabel = document.getElementById('timerLabel');
     const speedIndicator = document.getElementById('speedIndicator');
+    const murderBadge = document.getElementById('murderBadge');
+    const screenFlashEl = document.getElementById('screenFlash');
+    const murderErrorEl = document.getElementById('murderError');
+    const runStats = document.getElementById('runStats');
     const backdropEl = document.getElementById('backdrop');
     const feedEl = document.getElementById('feed');
     const catalogOverlay = document.getElementById('catalogOverlay');
@@ -590,6 +666,7 @@
     // AudioContext must be created/resumed from a user gesture (the Start
     // tap) or mobile browsers will silently block it.
     let audioCtx = null;
+    const VOLUME_MULTIPLIER = 2.5; // "250% louder" read as 2.5x original gain
     function ensureAudio() {
       if (!audioCtx) {
         try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -606,8 +683,9 @@
       const gain = audioCtx.createGain();
       osc.type = type;
       osc.frequency.value = freq;
+      const boostedGain = Math.min(1, peakGain * VOLUME_MULTIPLIER); // clamp so it can't clip
       gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(peakGain, t + Math.min(0.01, duration / 3));
+      gain.gain.exponentialRampToValueAtTime(boostedGain, t + Math.min(0.01, duration / 3));
       gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
@@ -635,6 +713,23 @@
       void finishFlashEl.offsetWidth;
       finishFlashEl.classList.add('active');
     }
+
+    // Red flash confined to the LCD screen, then a brief "error" message,
+    // then back to the live countdown. Purely cosmetic — game keeps running
+    // underneath the whole time.
+    function triggerMurderFX() {
+      screenFlashEl.classList.remove('active');
+      void screenFlashEl.offsetWidth;
+      screenFlashEl.classList.add('active');
+
+      setTimeout(() => {
+        murderErrorEl.classList.add('active');
+        setTimeout(() => {
+          murderErrorEl.classList.remove('active');
+        }, 1300);
+      }, 600);
+    }
+
     const gameOverOverlay = document.getElementById('gameOverOverlay');
     const gameOverStats = document.getElementById('gameOverStats');
     const resetBtn = document.getElementById('resetBtn');
@@ -690,30 +785,35 @@
 
     // ---------- state ----------
     const BASE_INTERVAL = 1000;
-    const MIN_INTERVAL = 120;   // readability floor: below this, effects blur together
-    const MAX_INTERVAL = 4000;  // ceiling so "slow" never fully stalls the game
-    const MAX_STACK = 10;       // fast/slow each cap at 10 stacks; further triggers do nothing
+    const MAX_STACK = 10;  // fast/slow each cap at 10 stacks; further triggers do nothing
     const START_SECONDS = 600;
 
     const state = {
       total: START_SECONDS,
+      peakTotal: 0,
       speedStack: 0, // -10 (max slow) .. +10 (max fast), single net counter
       frozenTicks: 0,
       blackoutTicks: 0,
       running: false,
       gameOver: false,
       tickHandle: null,
+      runStartTimestamp: 0,
+      murderedDigit: null,
+      hasMurderHappened: false,
+      cosmeticMode: null, // null | 'roman' | 'wingdings'
+      cosmeticTicksRemaining: 0,
     };
 
     let feedEvents = [];
     let feedCounter = 0;
+    let lastAppliedEffectId = null;
 
-    // Fast and slow stacks are netted into one exponent, then clamped to a
-    // human-readable range. Each tick always removes exactly 1 game-second;
-    // only how much *real* time that takes changes.
+    // No artificial floor or ceiling — the ratio shown is always the true
+    // ratio. At max fast this genuinely runs near the browser's real timer
+    // limit; at max slow it genuinely takes a very long time. Both are
+    // intentional now.
     function currentInterval() {
-      const raw = BASE_INTERVAL / Math.pow(2, state.speedStack);
-      return Math.min(MAX_INTERVAL, Math.max(MIN_INTERVAL, raw));
+      return Math.max(0, BASE_INTERVAL / Math.pow(2, state.speedStack));
     }
 
     // ---------- effects ----------
@@ -741,10 +841,11 @@
     function speedLabel() {
       if (state.speedStack === 0) return null;
       const ms = currentInterval();
-      const effectiveMultiplier = Math.round((BASE_INTERVAL / ms) * 100) / 100;
-      const stackDisplay = Math.abs(state.speedStack);
-      const dir = state.speedStack > 0 ? 'FAST' : 'SLOW';
-      return `${dir} \u00d7${effectiveMultiplier} (${stackDisplay}/${MAX_STACK}) (${Math.round(ms)}ms/tick)`;
+      const pl = n => (n === 1 ? 'Second' : 'Seconds');
+      let left, right;
+      if (state.speedStack > 0) { left = 1; right = Math.pow(2, state.speedStack); }
+      else { left = Math.pow(2, -state.speedStack); right = 1; }
+      return `${left} ${pl(left)} / ${right} ${pl(right)} (${Math.round(ms)}ms per tick)`;
     }
 
     // Palindrome check runs on the plain minute:second reading (ignores any
@@ -763,7 +864,112 @@
       return total;
     }
 
-    let lastAppliedEffectId = null;
+    // Exactly what's on screen, digits only — used by any effect that reads
+    // "the current reading" (Lucky Digit, Triple Six, Triple Nine, murder skip).
+    function visibleDigitsString(total) {
+      return formatTime(total).text.replace(/[^0-9]/g, '');
+    }
+
+    function countDigit(str, digit) {
+      let n = 0;
+      for (const c of str) if (c === digit) n++;
+      return n;
+    }
+
+    // If a digit has been "murdered", any total whose on-screen reading
+    // contains it gets skipped to the next value that doesn't — upward if
+    // time was just added, downward if it was just removed. Falls back to 0
+    // rather than looping forever if 0 itself contains the digit.
+    function applyMurderSkip(before, after) {
+      if (state.murderedDigit === null) return after;
+      const dir = after > before ? 1 : -1;
+      let candidate = after;
+      let guard = 0;
+      while (guard < 200000) {
+        if (candidate <= 0) return 0;
+        if (!visibleDigitsString(candidate).includes(state.murderedDigit)) return candidate;
+        candidate += dir;
+        guard++;
+      }
+      return after;
+    }
+
+    function toRoman(num) {
+      if (num <= 0) return 'N';
+      const map = [[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+      let res = '';
+      for (const [val, sym] of map) { while (num >= val) { res += sym; num -= val; } }
+      return res;
+    }
+
+    function formatTimeRoman(total) {
+      const u = decompose(total);
+      const order = ['century', 'decade', 'year', 'month', 'week', 'day'];
+      const labels = { century: 'C', decade: 'Dc', year: 'Y', month: 'Mo', week: 'W', day: 'D' };
+      const startIdx = order.findIndex(k => u[k] > 0);
+      let prefix = '';
+      if (startIdx !== -1) {
+        prefix = order.slice(startIdx).map(k => labels[k] + toRoman(u[k])).join(' ') + '  ';
+      }
+      const showHour = u.hour > 0 || startIdx !== -1;
+      const hh = showHour ? toRoman(u.hour) + ':' : '';
+      const mm = toRoman(u.minute);
+      const ss = toRoman(u.second);
+      return prefix + hh + mm + ':' + ss;
+    }
+
+    // Real Wingdings is a proprietary Microsoft font we can't ship, and it
+    // isn't installed on iOS anyway, so this substitutes each digit
+    // character for a dingbat-style Unicode symbol instead — renders the
+    // same everywhere, no font dependency.
+    const WINGDINGS_MAP = { '0':'\u25cf','1':'\u2605','2':'\u25b2','3':'\u25c6','4':'\u2726','5':'\u271a','6':'\u2613','7':'\u2b1f','8':'\u2756','9':'\u2736' };
+    function formatTimeWingdings(total) {
+      return formatTime(total).text.split('').map(ch => WINGDINGS_MAP[ch] || ch).join('');
+    }
+
+    // Kanji numerals are positional (十一 for 11, 二十 for 20), not a 1:1
+    // digit swap, so this is a real base-10 converter rather than a lookup
+    // table. Every value in this game is 0-99, so it never needs to go
+    // beyond the tens place.
+    const KANJI_DIGITS = ['\u3007','\u4e00','\u4e8c','\u4e09','\u56db','\u4e94','\u516d','\u4e03','\u516b','\u4e5d'];
+    function toKanji(num) {
+      if (num < 10) return KANJI_DIGITS[num];
+      if (num < 100) {
+        const tens = Math.floor(num / 10);
+        const ones = num % 10;
+        let res = (tens > 1 ? KANJI_DIGITS[tens] : '') + '\u5341';
+        if (ones > 0) res += KANJI_DIGITS[ones];
+        return res;
+      }
+      return String(num); // shouldn't occur given this game's value ranges
+    }
+    function formatTimeKanji(total) {
+      const u = decompose(total);
+      const order = ['century', 'decade', 'year', 'month', 'week', 'day'];
+      const labels = { century: 'C', decade: 'Dc', year: 'Y', month: 'Mo', week: 'W', day: 'D' };
+      const startIdx = order.findIndex(k => u[k] > 0);
+      let prefix = '';
+      if (startIdx !== -1) {
+        prefix = order.slice(startIdx).map(k => labels[k] + toKanji(u[k])).join(' ') + '  ';
+      }
+      const showHour = u.hour > 0 || startIdx !== -1;
+      const hh = showHour ? toKanji(u.hour) + ':' : '';
+      const mm = toKanji(u.minute);
+      const ss = toKanji(u.second);
+      return prefix + hh + mm + ':' + ss;
+    }
+
+    // Falls back to the player's own local minute if the Hawaii timezone
+    // lookup ever fails (very old browser, unusual environment) so a
+    // timezone quirk can't crash the game.
+    function getHawaiiMinute() {
+      try {
+        const fmt = new Intl.DateTimeFormat('en-US', { timeZone: 'Pacific/Honolulu', minute: 'numeric' });
+        return parseInt(fmt.format(new Date()), 10);
+      } catch (e) {
+        return new Date().getMinutes();
+      }
+    }
 
     const EFFECTS = [
       { id: 'plus1s', name: '+1 Second', chance: 0.12, desc: 'Adds one second to the clock.',
@@ -830,12 +1036,68 @@
           const label = source.apply();
           return `Echo: repeated "${source.name}" \u2014 ${label}`;
         } },
-      { id: 'lucky7', name: 'Lucky Digit', chance: 0.04, desc: 'If a 7 appears anywhere in the current reading, +7 seconds. Otherwise this roll fizzles.',
+      { id: 'lucky7', name: 'Lucky Digit', chance: 0.04, desc: 'If a 7 appears anywhere in the current on-screen reading, +7 seconds. Otherwise this roll fizzles.',
         apply() {
-          const u = decompose(state.total);
-          const shown = `${u.century}${u.decade}${u.year}${u.month}${u.week}${u.day}${u.hour}${u.minute}${u.second}`;
-          if (shown.includes('7')) { state.total += 7; return 'Lucky digit: 7 spotted \u2014 +7 seconds'; }
+          if (visibleDigitsString(state.total).includes('7')) { state.total += 7; return 'Lucky digit: 7 spotted \u2014 +7 seconds'; }
           return 'Lucky digit: no 7 on screen \u2014 nothing happens';
+        } },
+      { id: 'triple6', name: 'Triple Six', chance: 0.02, desc: 'If three 6s appear anywhere in the current reading, +6 days. Otherwise this roll fizzles.',
+        apply() {
+          if (countDigit(visibleDigitsString(state.total), '6') >= 3) { state.total += 6 * 86400; return 'Triple Six: 666 spotted \u2014 +6 days'; }
+          return 'Triple Six: fewer than three 6s \u2014 nothing happens';
+        } },
+      { id: 'triple9', name: 'Triple Nine', chance: 0.02, desc: 'If three 9s appear anywhere in the current reading, the timer is set straight to 9 seconds. Otherwise this roll fizzles.',
+        apply() {
+          if (countDigit(visibleDigitsString(state.total), '9') >= 3) { state.total = 9; return 'Triple Nine: 999 spotted \u2014 timer set to 9 seconds'; }
+          return 'Triple Nine: fewer than three 9s \u2014 nothing happens';
+        } },
+      { id: 'murder', name: 'Murder a Number', chance: 0.015, desc: 'One-time only. Permanently bans one digit (0-9) from ever appearing again — the clock skips over any value containing it for the rest of the run.',
+        apply() {
+          if (state.hasMurderHappened) return 'Murder already used this game';
+          state.hasMurderHappened = true;
+          const digit = String(Math.floor(Math.random() * 10));
+          state.murderedDigit = digit;
+          murderBadge.textContent = digit;
+          murderBadge.style.display = 'block';
+          triggerMurderFX();
+          return `Murder: the digit ${digit} is gone for good`;
+        } },
+      { id: 'roman', name: 'Roman Numerals', chance: 0.03, desc: 'Purely cosmetic. Switches the display to Roman numerals. If no cosmetic skin is currently active, starts a fresh 60-tick window; if one is already running (Wingdings/Kanji), just swaps the skin without resetting the remaining ticks.',
+        apply() {
+          if (state.cosmeticTicksRemaining <= 0) state.cosmeticTicksRemaining = 60;
+          state.cosmeticMode = 'roman';
+          return 'Roman numerals';
+        } },
+      { id: 'wingdings', name: 'Wingdings', chance: 0.03, desc: 'Purely cosmetic. Switches the display to dingbat symbols. Shares the same 60-tick window as the other cosmetic skins — only starts a fresh window if none is active.',
+        apply() {
+          if (state.cosmeticTicksRemaining <= 0) state.cosmeticTicksRemaining = 60;
+          state.cosmeticMode = 'wingdings';
+          return 'Wingdings symbols';
+        } },
+      { id: 'kanji', name: 'Kanji Numerals', chance: 0.03, desc: 'Purely cosmetic. Switches the display to Kanji numerals (proper positional conversion, not a digit swap). Shares the same 60-tick window as the other cosmetic skins.',
+        apply() {
+          if (state.cosmeticTicksRemaining <= 0) state.cosmeticTicksRemaining = 60;
+          state.cosmeticMode = 'kanji';
+          return 'Kanji numerals';
+        } },
+      { id: 'timesteal', name: 'Time Steal (Hawaii)', chance: 0.03, desc: "Steals the current minute value from real-world Hawaii time and overwrites the clock's minute field with it. Everything else is untouched.",
+        apply() {
+          const stolen = getHawaiiMinute();
+          const u = decompose(state.total);
+          u.minute = stolen;
+          state.total = recompose(u);
+          return `Time Steal: Hawaii's minute is ${stolen} \u2014 clock minute set to match`;
+        } },
+      { id: 'dice', name: 'Dice Roll', chance: 0.005, desc: 'Rolls a D6 and multiplies the time by the result. 1-in-20 chance the D6 upgrades to a D20 before rolling, and that D20 has a 1-in-100 chance to upgrade again to a D100.',
+        apply() {
+          let sides = 6, label = 'D6';
+          if (Math.random() < 1 / 20) {
+            sides = 20; label = 'D20';
+            if (Math.random() < 1 / 100) { sides = 100; label = 'D100'; }
+          }
+          const roll = Math.floor(Math.random() * sides) + 1;
+          state.total = Math.round(state.total * roll);
+          return `Dice roll: ${label} \u2192 ${roll} \u2014 time \u00d7${roll}`;
         } },
     ];
 
@@ -878,6 +1140,16 @@
 
     // ---------- display ----------
     function updateDisplay() {
+      if (state.total > state.peakTotal) state.peakTotal = state.total;
+
+      if (state.cosmeticMode) {
+        const formatters = { roman: formatTimeRoman, wingdings: formatTimeWingdings, kanji: formatTimeKanji };
+        timerDisplay.textContent = formatters[state.cosmeticMode](state.total);
+        timerDisplay.classList.remove('medium');
+        timerDisplay.classList.add('long');
+        return;
+      }
+
       const f = formatTime(state.total);
       timerDisplay.textContent = f.text;
       timerDisplay.classList.toggle('medium', f.tier === 1);
@@ -912,7 +1184,9 @@
       for (const fx of EFFECTS) {
         cumulative += fx.chance;
         if (roll < cumulative) {
+          const before = state.total;
           const label = fx.apply();
+          state.total = applyMurderSkip(before, state.total);
           logFeed(label);
           if (fx.id !== 'echo') lastAppliedEffectId = fx.id;
           return;
@@ -950,7 +1224,12 @@
         return;
       }
 
-      state.total = Math.max(0, state.total - 1);
+      const beforeTick = state.total;
+      state.total = applyMurderSkip(beforeTick, Math.max(0, state.total - 1));
+      if (state.cosmeticTicksRemaining > 0) {
+        state.cosmeticTicksRemaining--;
+        if (state.cosmeticTicksRemaining === 0) state.cosmeticMode = null;
+      }
       updateDisplay();
       updateStatusRow();
       playTick();
@@ -970,10 +1249,22 @@
 
     function endBlackout() {
       blackoutEl.classList.remove('active');
-      state.total += 300;
+      const before = state.total;
+      state.total = applyMurderSkip(before, state.total + 300);
       updateDisplay();
       logFeed('Power restored (+5:00)');
       showToast('AN ERROR OCCURRED \u2014 +5:00 ADDED');
+    }
+
+    function formatDuration(ms) {
+      let s = Math.round(ms / 1000);
+      const h = Math.floor(s / 3600); s %= 3600;
+      const m = Math.floor(s / 60); s %= 60;
+      const parts = [];
+      if (h > 0) parts.push(`${h}h`);
+      if (h > 0 || m > 0) parts.push(`${m}m`);
+      parts.push(`${s}s`);
+      return parts.join(' ');
     }
 
     // ---------- lifecycle ----------
@@ -981,11 +1272,19 @@
       if (state.running) return;
       ensureAudio();
       state.total = START_SECONDS;
+      state.peakTotal = 0;
       state.speedStack = 0;
       state.frozenTicks = 0;
       state.blackoutTicks = 0;
       state.gameOver = false;
       state.running = true;
+      state.runStartTimestamp = Date.now();
+      state.murderedDigit = null;
+      state.hasMurderHappened = false;
+      state.cosmeticMode = null;
+      state.cosmeticTicksRemaining = 0;
+      murderBadge.style.display = 'none';
+      runStats.classList.remove('visible');
       feedEvents = [];
       renderFeed();
       updateDisplay();
@@ -1008,6 +1307,9 @@
       vibrateFinish();
       flashFinish();
 
+      const peakText = formatTime(state.peakTotal).text.trim();
+      const durationText = formatDuration(Date.now() - state.runStartTimestamp);
+
       consoleEl.addEventListener('animationend', function handler() {
         consoleEl.removeEventListener('animationend', handler);
         consoleEl.classList.remove('shake');
@@ -1018,6 +1320,8 @@
         updateDisplay();
         updateStatusRow();
         timerLabel.textContent = 'Ready to begin';
+        runStats.textContent = `PEAK ${peakText}  \u00b7  TOOK ${durationText}`;
+        runStats.classList.add('visible');
         startBtn.disabled = false;
       });
     }
@@ -1030,7 +1334,9 @@
       consoleEl.classList.remove('running');
       backdropEl.classList.remove('active');
       const reading = `C${u.century} Dc${u.decade} Y${u.year} Mo${u.month} W${u.week} D${u.day} ${String(u.hour).padStart(2,'0')}:${String(u.minute).padStart(2,'0')}:${String(u.second).padStart(2,'0')}`;
-      gameOverStats.textContent = `Final reading: ${reading}. That's a 2-century clock \u2014 screenshot this as your proof.`;
+      const peakText = formatTime(state.peakTotal).text.trim();
+      const durationText = formatDuration(Date.now() - state.runStartTimestamp);
+      gameOverStats.textContent = `Final reading: ${reading}. That's a 2-century clock \u2014 screenshot this as your proof. Peak: ${peakText}. Took: ${durationText}.`;
       gameOverOverlay.classList.add('active');
     }
 
@@ -1039,11 +1345,18 @@
       blackoutEl.classList.remove('active');
       backdropEl.classList.remove('active');
       state.total = START_SECONDS;
+      state.peakTotal = 0;
       state.speedStack = 0;
       state.frozenTicks = 0;
       state.blackoutTicks = 0;
       state.gameOver = false;
       state.running = false;
+      state.murderedDigit = null;
+      state.hasMurderHappened = false;
+      state.cosmeticMode = null;
+      state.cosmeticTicksRemaining = 0;
+      murderBadge.style.display = 'none';
+      runStats.classList.remove('visible');
       feedEvents = [];
       renderFeed();
       consoleEl.classList.remove('running', 'shake');
