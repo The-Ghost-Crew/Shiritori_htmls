@@ -6,7 +6,6 @@
 <title>Shiritori Normalizer</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
     --bg:        #0c0c0f;
     --surface:   #13131a;
@@ -23,7 +22,6 @@
     --muted:     #5a5a7a;
     --mono:      'Courier New', monospace;
   }
-
   body {
     font-family: var(--mono);
     background: var(--bg);
@@ -31,14 +29,11 @@
     min-height: 100vh;
     padding: 28px 16px 60px;
   }
-
   .wrap { max-width: 780px; margin: 0 auto; }
-
   header { margin-bottom: 28px; }
   .logo { font-size: 11px; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
   h1 { font-size: 1.75rem; font-weight: 700; color: var(--accent); letter-spacing: -0.01em; line-height: 1.1; }
   .tagline { font-size: 11px; color: var(--muted); margin-top: 5px; letter-spacing: 0.05em; }
-
   .input-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
   .input-label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; display: block; }
   textarea {
@@ -48,7 +43,6 @@
     outline: none; transition: border-color 0.15s; line-height: 1.5;
   }
   textarea:focus { border-color: var(--accent); }
-
   .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; align-items: center; }
   button {
     font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
@@ -59,11 +53,9 @@
   button.primary { background: #0d1f35; border-color: var(--accent); color: var(--accent); }
   button.primary:hover { background: #122840; }
   .char-count { font-size: 11px; color: var(--muted); margin-left: auto; }
-
   .output-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; display: none; }
   .card-label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
   .pill { background: var(--surface2); border: 1px solid var(--border2); border-radius: 20px; padding: 1px 8px; font-size: 10px; color: var(--muted); }
-
   .variant-row { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--surface2); }
   .variant-row:last-child { border-bottom: none; }
   .v-num { font-size: 10px; color: var(--muted); min-width: 20px; }
@@ -72,7 +64,7 @@
   .v-text.omit { color: var(--muted); font-weight: 400; font-style: italic; font-size: 13px; }
   .v-tag { font-size: 10px; color: var(--muted); border: 1px solid var(--border2); border-radius: 3px; padding: 1px 6px; margin-left: 4px; }
   .v-tag.custom { color: var(--ok2); border-color: var(--ok2); opacity: 0.6; }
-
+  .v-tag.vb { color: var(--accent2); border-color: var(--accent2); opacity: 0.7; }
   .warn-card { background: #1a100a; border: 1px solid #5a2a0a; border-radius: 10px; padding: 16px; margin-bottom: 12px; display: none; }
   .warn-card.invalid { background: #1a0a0a; border-color: #7a1010; }
   .warn-title { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--warn); margin-bottom: 10px; }
@@ -82,7 +74,6 @@
   .warn-body { font-size: 12px; color: #aaa; line-height: 1.8; }
   .warn-body a { color: var(--accent); text-decoration: none; }
   .warn-body a:hover { text-decoration: underline; }
-
   .override-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 12px; }
   .override-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
   .override-row input {
@@ -95,7 +86,6 @@
   .override-tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 24px; }
   .o-tag { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 2px 8px; font-size: 11px; color: var(--muted); cursor: pointer; transition: all 0.12s; }
   .o-tag:hover { border-color: var(--error); color: var(--error); }
-
   .info-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
   .info-toggle { width: 100%; text-align: left; padding: 12px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); background: none; border: none; border-radius: 0; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
   .info-toggle:hover { color: var(--accent); border-color: transparent; }
@@ -106,7 +96,6 @@
   .abbr-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
   .abbr-chip { background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px; padding: 1px 8px; font-size: 11px; color: var(--accent2); }
   .cap-warn { font-size: 11px; color: var(--warn); margin-top: 8px; }
-
   /* ── Preserve case toggle ── */
   .case-toggle-row {
     display: flex;
@@ -140,7 +129,6 @@
   .case-toggle-btn.on .case-toggle-knob { left: 18px; background: var(--ok); }
   .case-toggle-label { font-size: 12px; color: var(--muted); }
   .case-toggle-label span { color: var(--text); }
-
   /* ── Settings floating button ── */
   .settings-fab {
     position: fixed;
@@ -164,7 +152,6 @@
   }
   .settings-fab:hover { background: var(--surface); border-color: var(--accent); color: var(--accent); transform: scale(1.08); }
   .settings-fab.open  { background: #0d1f35; border-color: var(--accent); color: var(--accent); transform: rotate(30deg); }
-
   /* ── Settings overlay backdrop ── */
   .settings-backdrop {
     display: none;
@@ -174,7 +161,6 @@
     background: rgba(0,0,0,0.45);
   }
   .settings-backdrop.open { display: block; }
-
   /* ── Settings panel ── */
   .settings-panel {
     position: fixed;
@@ -218,7 +204,6 @@
     letter-spacing: 0;
   }
   .settings-close-btn:hover { color: var(--text); border-color: transparent; }
-
   /* ── IUPAC info box ── */
   .settings-iupac {
     background: #0a1520;
@@ -231,7 +216,6 @@
     margin-bottom: 16px;
   }
   .settings-iupac strong { color: var(--accent); }
-
   /* ── Number mode selector ── */
   .num-mode-label {
     font-size: 11px;
@@ -284,9 +268,7 @@
   .num-mode-text .nm-main { font-size: 12px; color: var(--text); }
   .num-mode-text .nm-sub  { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: 0.04em; }
   .num-mode-option.selected .nm-main { color: var(--accent); }
-
   .settings-coming { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; border-top: 1px solid var(--border); padding-top: 12px; }
-
   /* ── Settings tabs ── */
   .settings-tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 0; }
   .settings-tab {
@@ -299,7 +281,6 @@
   .settings-tab.active { color: var(--accent); border-color: var(--accent); }
   .settings-tab-panel { display: none; }
   .settings-tab-panel.active { display: block; }
-
   /* ── Greek settings tip ── */
   .settings-greek-tip {
     background: #140f22;
@@ -312,7 +293,6 @@
     margin-bottom: 16px;
   }
   .settings-greek-tip strong { color: var(--accent2); }
-
   /* ── Collapsible reference lists ── */
   .ref-section { margin-bottom: 14px; }
   .ref-toggle {
@@ -343,13 +323,11 @@
 </head>
 <body>
 <div class="wrap">
-
   <header>
     <div class="logo">Shiritori</div>
-    <h1>Normalizer <span style="font-size:0.55rem;font-weight:400;color:var(--muted);letter-spacing:0.15em;vertical-align:middle">VERSION 5</span></h1>
+    <h1>Normalizer <span style="font-size:0.55rem;font-weight:400;color:var(--muted);letter-spacing:0.15em;vertical-align:middle">VERSION 6</span></h1>
     <div class="tagline">Converts words to spoken hyphenated form · a-z, hyphen, apostrophe only</div>
   </header>
-
   <div class="input-card">
     <span class="input-label">Word to normalize</span>
     <textarea id="input" placeholder="Type a word or phrase with a title prefix (e.g. dr. White)…" spellcheck="false"></textarea>
@@ -366,7 +344,6 @@
       <span class="case-toggle-label"><span>Preserve casing</span> — letters keep their original case, normalized segments stay lowercase</span>
     </div>
   </div>
-
   <div class="output-card" id="outputCard">
     <div class="card-label">
       Output variants
@@ -375,13 +352,11 @@
     <div id="outputBody"></div>
     <div class="cap-warn" id="capWarn" style="display:none"></div>
   </div>
-
   <div class="warn-card" id="warnCard">
     <div class="warn-title" id="warnTitle">Unregistered characters</div>
     <div class="unreg-chars" id="unregChars"></div>
     <div class="warn-body" id="warnBody"></div>
   </div>
-
   <div class="override-card">
     <div class="card-label">Additional normalizations</div>
     <div class="override-hint">
@@ -395,7 +370,6 @@
     </div>
     <div class="override-tags" id="overrideTags"></div>
   </div>
-
   <div class="info-card">
     <button class="info-toggle" onclick="toggleInfo()">
       <span>Normalization reference &amp; suggest a rule</span>
@@ -403,7 +377,6 @@
     </button>
     <div class="info-body" id="infoBody">
       <p style="margin-bottom:12px">All output must only contain <strong style="color:var(--accent)">a–z</strong>, <strong style="color:var(--accent)">-</strong> (hyphen), and <strong style="color:var(--accent)">'</strong> (apostrophe). Words cannot start or end with a hyphen.</p>
-
       <div class="ref-section">
         <div class="ref-toggle" onclick="toggleRef('refAbbr',this)">
           <span class="ref-toggle-title">Title abbreviations</span>
@@ -422,7 +395,6 @@
           </div>
         </div>
       </div>
-
       <div class="ref-section">
         <div class="ref-toggle" onclick="toggleRef('refPunct',this)">
           <span class="ref-toggle-title">Punctuation</span>
@@ -450,7 +422,34 @@
           </div>
         </div>
       </div>
-
+      <div class="ref-section">
+        <div class="ref-toggle" onclick="toggleRef('refVonBaeyer',this)">
+          <span class="ref-toggle-title">Von Baeyer chemical nomenclature</span>
+          <span class="ref-toggle-arrow">▶</span>
+        </div>
+        <div class="ref-list" id="refVonBaeyer">
+          <p style="font-size:11px;color:var(--muted);margin-bottom:6px">
+            When a <strong style="color:var(--text)">( )</strong> or <strong style="color:var(--text)">[ ]</strong> group directly follows a word ending in <strong style="color:var(--accent2)">-cyclo</strong>
+            (bicyclo, tricyclo, tetracyclo, pentacyclo, trioxatetracyclo, …), it's treated as a Von&nbsp;Baeyer ring descriptor — the official IUPAC form uses square
+            brackets, but the same logic applies to parentheses. The brackets and the periods/commas inside them are structural and stay silent (they become plain
+            hyphens, never "parenthesis", "point", or "comma"), and each main bridge count is read as one spoken quantity rather than spelled digit-by-digit — so it
+            always uses word form there, independent of the Numbers setting.
+          </p>
+          <div class="ref-grid">
+            <div class="ref-item"><span class="ref-item-sym">tricyclo(2.2.1)heptane</span><span class="ref-item-arrow">→</span><span class="ref-item-name">tricyclo-two-two-one-heptane</span></div>
+            <div class="ref-item"><span class="ref-item-sym">(12.4.0)</span><span class="ref-item-arrow">→</span><span class="ref-item-name">twelve-four-zero</span></div>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px">
+            Two situations are left on the normal digit/word branching instead of being forced, because plain text can't recover them safely:
+          </p>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px">
+            <strong style="color:var(--text)">1. A digit run starting with 0</strong> (e.g. <strong style="color:var(--text)">02,7</strong>, from a secondary bridge like <strong style="color:var(--text)">0²,⁷</strong>) stays digit-by-digit (<em>zero-two-seven</em>) — a leading zero is a signal not to guess at a word-form reading.
+          </p>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px">
+            <strong style="color:var(--text)">2. A digit run touching a comma</strong> (e.g. the <strong style="color:var(--text)">12</strong> in <strong style="color:var(--text)">1²,¹¹</strong> → plain-text <strong style="color:var(--text)">1¹,¹¹</strong>) is a secondary-bridge length fused with a lost superscript locant that just happen to sit next to each other with no space — since that can't be told apart from a literal two-digit number, it's left as a normal branching number rather than asserted as one reading.
+          </p>
+        </div>
+      </div>
       <div class="ref-section">
         <div class="ref-toggle" onclick="toggleRef('refCurrency',this)">
           <span class="ref-toggle-title">Currency symbols</span>
@@ -478,7 +477,6 @@
           </div>
         </div>
       </div>
-
       <div class="ref-section">
         <div class="ref-toggle" onclick="toggleRef('refGreek',this)">
           <span class="ref-toggle-title">Greek letters</span>
@@ -514,7 +512,6 @@
           </div>
         </div>
       </div>
-
       <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
         <p style="font-size:11px;color:var(--muted)"><strong style="color:var(--text)">Missing a rule or character? Suggest it:</strong></p>
         <p style="font-size:11px;color:var(--muted)">→ <a href="https://discord.com/channels/1145887707323699340/1360164828651716660" target="_blank">Discord normalization channel</a></p>
@@ -522,31 +519,26 @@
       </div>
     </div>
   </div>
-
 </div>
-
 <!-- Settings floating button -->
 <button class="settings-fab" id="settingsFab" onclick="toggleSettings()" title="Settings" aria-label="Settings">⚙</button>
-
 <!-- Backdrop -->
 <div class="settings-backdrop" id="settingsBackdrop" onclick="closeSettings()"></div>
-
 <!-- Settings panel -->
 <div class="settings-panel" id="settingsPanel">
   <div class="settings-panel-title">
     <span>Settings</span>
     <button class="settings-close-btn" onclick="closeSettings()">✕</button>
   </div>
-
   <div class="settings-tabs">
     <button class="settings-tab active" onclick="switchSettingsTab('numbers',this)">Numbers</button>
     <button class="settings-tab" onclick="switchSettingsTab('greek',this)">Greek</button>
   </div>
-
   <!-- Numbers tab -->
   <div class="settings-tab-panel active" id="stab-numbers">
     <div class="settings-iupac">
       <strong>Tip:</strong> Use <strong>Word form only</strong> when normalizing <strong>IUPAC chemical names</strong> — numbers there represent positions, not quantities, so digit-by-digit produces incorrect extra variants.
+      Von&nbsp;Baeyer ring descriptors like <strong>tricyclo(2.2.1)</strong> are detected automatically and always use word form for their bridge counts, regardless of this setting — see the reference panel below.
     </div>
     <div class="num-mode-label">Number output mode</div>
     <div class="num-mode-options">
@@ -573,7 +565,6 @@
       </div>
     </div>
   </div>
-
   <!-- Greek tab -->
   <div class="settings-tab-panel" id="stab-greek">
     <div class="settings-greek-tip">
@@ -604,76 +595,74 @@
       </div>
     </div>
   </div>
-
   <div class="settings-coming">More setting options coming soon</div>
 </div>
 <script>
 // ═══════════════════════════════════════════════════════════
 //  CONSTANTS
 // ═══════════════════════════════════════════════════════════
-
 const TITLE_ABBRS = ["dr","ms","mr","mrs","st","rd","mt"];
 const MAX_VARIANTS = 48;
 const DISCORD_LINK = "https://discord.com/channels/1145887707323699340/1360164828651716660";
 const DISCORD_USER = "no_where.ghost_002";
-
 const ones = [
   "zero","one","two","three","four","five","six","seven","eight","nine",
   "ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen",
   "seventeen","eighteen","nineteen"
 ];
 const tensW = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-
+// Von Baeyer ring-fusion prefixes: a "(" or "[" immediately after a word ending
+// in "cyclo" (bicyclo, tricyclo, tetracyclo, trioxatetracyclo, ...) is treated
+// as a structural ring descriptor, not literary punctuation.
+const VON_BAEYER_SUFFIX_RE = /cyclo$/;
 // Currency symbols → spoken word
 const CURRENCY_MAP = {
-  "\u20AC": "euro",    // €
-  "\u00A3": "pound",   // £
-  "\u00A5": "yen",     // ¥
-  "\u20A9": "won",     // ₩
-  "\u20B9": "rupee",   // ₹
-  "\u0024": "dollar",  // $
-  "\u20BD": "ruble",   // ₽
-  "\u0E3F": "baht",    // ฿
-  "\u20AB": "dong",    // ₫
-  "\u20B4": "hryvnia", // ₴
-  "\u20B2": "guarani", // ₲
-  "\u20A6": "naira",   // ₦
-  "\u20B5": "cedi",    // ₵
-  "\u20A1": "colon",   // ₡
-  "\u20B8": "tenge",   // ₸
-  "\u060B": "afghani", // ؋
-  "\u20BA": "lira",    // ₺
+  "€": "euro",    // €
+  "£": "pound",   // £
+  "¥": "yen",     // ¥
+  "₩": "won",     // ₩
+  "₹": "rupee",   // ₹
+  "$": "dollar",  // $
+  "₽": "ruble",   // ₽
+  "฿": "baht",    // ฿
+  "₫": "dong",    // ₫
+  "₴": "hryvnia", // ₴
+  "₲": "guarani", // ₲
+  "₦": "naira",   // ₦
+  "₵": "cedi",    // ₵
+  "₡": "colon",   // ₡
+  "₸": "tenge",   // ₸
+  "؋": "afghani", // ؋
+  "₺": "lira",    // ₺
 };
-
 // Greek letters → { roman, word }
 // Upper and lowercase map to the same output
 const GREEK_MAP = {
-  "\u0391":"alpha","\u03B1":"alpha", // Α α
-  "\u0392":"beta", "\u03B2":"beta",  // Β β
-  "\u0393":"gamma","\u03B3":"gamma", // Γ γ
-  "\u0394":"delta","\u03B4":"delta", // Δ δ
-  "\u0395":"epsilon","\u03B5":"epsilon", // Ε ε
-  "\u0396":"zeta", "\u03B6":"zeta",  // Ζ ζ
-  "\u0397":"eta",  "\u03B7":"eta",   // Η η
-  "\u0398":"theta","\u03B8":"theta", // Θ θ
-  "\u0399":"iota", "\u03B9":"iota",  // Ι ι
-  "\u039A":"kappa","\u03BA":"kappa", // Κ κ
-  "\u039B":"lambda","\u03BB":"lambda",// Λ λ
-  "\u039C":"mu",   "\u03BC":"mu",    // Μ μ
-  "\u039D":"nu",   "\u03BD":"nu",    // Ν ν
-  "\u039E":"xi",   "\u03BE":"xi",    // Ξ ξ
-  "\u039F":"omicron","\u03BF":"omicron",// Ο ο
-  "\u03A0":"pi",   "\u03C0":"pi",    // Π π
-  "\u03A1":"rho",  "\u03C1":"rho",   // Ρ ρ
-  "\u03A3":"sigma","\u03C3":"sigma","\u03C2":"sigma", // Σ σ ς
-  "\u03A4":"tau",  "\u03C4":"tau",   // Τ τ
-  "\u03A5":"upsilon","\u03C5":"upsilon",// Υ υ
-  "\u03A6":"phi",  "\u03C6":"phi",   // Φ φ
-  "\u03A7":"chi",  "\u03C7":"chi",   // Χ χ
-  "\u03A8":"psi",  "\u03C8":"psi",   // Ψ ψ
-  "\u03A9":"omega","\u03C9":"omega", // Ω ω
+  "Α":"alpha","α":"alpha", // Α α
+  "Β":"beta", "β":"beta",  // Β β
+  "Γ":"gamma","γ":"gamma", // Γ γ
+  "Δ":"delta","δ":"delta", // Δ δ
+  "Ε":"epsilon","ε":"epsilon", // Ε ε
+  "Ζ":"zeta", "ζ":"zeta",  // Ζ ζ
+  "Η":"eta",  "η":"eta",   // Η η
+  "Θ":"theta","θ":"theta", // Θ θ
+  "Ι":"iota", "ι":"iota",  // Ι ι
+  "Κ":"kappa","κ":"kappa", // Κ κ
+  "Λ":"lambda","λ":"lambda",// Λ λ
+  "Μ":"mu",   "μ":"mu",    // Μ μ
+  "Ν":"nu",   "ν":"nu",    // Ν ν
+  "Ξ":"xi",   "ξ":"xi",    // Ξ ξ
+  "Ο":"omicron","ο":"omicron",// Ο ο
+  "Π":"pi",   "π":"pi",    // Π π
+  "Ρ":"rho",  "ρ":"rho",   // Ρ ρ
+  "Σ":"sigma","σ":"sigma","ς":"sigma", // Σ σ ς
+  "Τ":"tau",  "τ":"tau",   // Τ τ
+  "Υ":"upsilon","υ":"upsilon",// Υ υ
+  "Φ":"phi",  "φ":"phi",   // Φ φ
+  "Χ":"chi",  "χ":"chi",   // Χ χ
+  "Ψ":"psi",  "ψ":"psi",   // Ψ ψ
+  "Ω":"omega","ω":"omega", // Ω ω
 };
-
 // Greek romanization (traditional Latin transliteration per spec)
 const GREEK_ROMAN = {
   "alpha":"a","beta":"b","gamma":"g","delta":"d","epsilon":"e",
@@ -682,15 +671,12 @@ const GREEK_ROMAN = {
   "pi":"p","rho":"r","sigma":"s","tau":"t","upsilon":"y",
   "phi":"ph","chi":"kh","psi":"ps","omega":"o",
 };
-
 const GREEK_CHARS = new Set(Object.keys(GREEK_MAP));
-
 // Structure: { "007": ["double-o-seven"], "word": ["extra1","extra2"] }
 function getOverrides() {
   try { return JSON.parse(localStorage.getItem("sn_overrides2") || "{}"); } catch { return {}; }
 }
 function setOverrides(o) { localStorage.setItem("sn_overrides2", JSON.stringify(o)); }
-
 function addOverride() {
   const k = document.getElementById("overKey").value.trim();
   const v = document.getElementById("overVal").value.trim();
@@ -703,7 +689,6 @@ function addOverride() {
   document.getElementById("overVal").value = "";
   renderOverrides();
 }
-
 function removeOverride(k, v) {
   const o = getOverrides();
   if (!o[k]) return;
@@ -712,7 +697,6 @@ function removeOverride(k, v) {
   setOverrides(o);
   renderOverrides();
 }
-
 function renderOverrides() {
   const o = getOverrides();
   const el = document.getElementById("overrideTags");
@@ -730,43 +714,35 @@ function renderOverrides() {
   }
   el.innerHTML = html;
 }
-
 // ═══════════════════════════════════════════════════════════
 //  NUMBER MODE SETTING
 //  0 = both  1 = word-form only  2 = digit-by-digit only
 // ═══════════════════════════════════════════════════════════
-
 let numMode     = 0;
 let greekMode   = 0;
 let preserveCase = false;
-
 function toggleCase() {
   preserveCase = !preserveCase;
   const btn = document.getElementById("caseToggleBtn");
   btn.classList.toggle("on", preserveCase);
 }
-
 function setNumMode(mode) {
   numMode = mode;
   [0,1,2].forEach(i => document.getElementById("nmOpt"+i).classList.toggle("selected", i===mode));
 }
-
 function setGreekMode(mode) {
   greekMode = mode;
   [0,1,2].forEach(i => document.getElementById("grOpt"+i).classList.toggle("selected", i===mode));
 }
-
 function switchSettingsTab(name, btn) {
   document.querySelectorAll(".settings-tab").forEach(t => t.classList.remove("active"));
   document.querySelectorAll(".settings-tab-panel").forEach(p => p.classList.remove("active"));
   btn.classList.add("active");
   document.getElementById("stab-"+name).classList.add("active");
 }
-
 // ═══════════════════════════════════════════════════════════
 //  SETTINGS PANEL
 // ═══════════════════════════════════════════════════════════
-
 function toggleSettings() {
   const panel    = document.getElementById("settingsPanel");
   const backdrop = document.getElementById("settingsBackdrop");
@@ -782,7 +758,6 @@ function toggleSettings() {
     requestAnimationFrame(() => panel.classList.add("open"));
   }
 }
-
 function closeSettings() {
   const panel    = document.getElementById("settingsPanel");
   const backdrop = document.getElementById("settingsBackdrop");
@@ -793,9 +768,7 @@ function closeSettings() {
   // Hide after transition
   setTimeout(() => { if (!panel.classList.contains("open")) panel.style.display = "none"; }, 200);
 }
-
 function digitToWord(d) { return ones[parseInt(d, 10)]; }
-
 // Full spoken form, no "and", spaces replaced by hyphens.
 // Returns null if n > 1,000,000,000 (1 billion) — caller shows warning.
 function numToWords(n) {
@@ -824,11 +797,9 @@ function numToWords(n) {
   // Exactly 1 billion
   return "one-billion";
 }
-
 // ═══════════════════════════════════════════════════════════
 //  INPUT VALIDATION
 // ═══════════════════════════════════════════════════════════
-
 function parseInput(raw) {
   const trimmed = raw.trim();
   if (!trimmed) return { valid: false, reason: "empty" };
@@ -842,22 +813,17 @@ function parseInput(raw) {
   }
   return { valid: false, reason: "invalid-space" };
 }
-
 // ═══════════════════════════════════════════════════════════
 //  DIACRITICS + CHAR CLASSIFICATION
 // ═══════════════════════════════════════════════════════════
-
-function stripDiacritics(s) { return s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+function stripDiacritics(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, ""); }
 function isLetter(c) { return /^[a-z]$/.test(c); }
 function isDigit(c)  { return /^[0-9]$/.test(c); }
-
 const KNOWN_PUNCT = new Set(['(',')','{','}','[',']','/','\\','~','_','.',',',':',';','+','!','?',"'",'-','^']);
 const CURRENCY_CHARS = new Set(Object.keys(CURRENCY_MAP));
-
 // ═══════════════════════════════════════════════════════════
 //  TOKENIZER
 // ═══════════════════════════════════════════════════════════
-
 function tokenize(raw) {
   const s    = stripDiacritics(raw).toLowerCase();
   const orig = stripDiacritics(raw); // original case preserved
@@ -876,11 +842,11 @@ function tokenize(raw) {
       tokens.push({ t: "letter", v: c, vOrig: orig[i] });
       i++; continue;
     }
-    if (c === "-" || c === "\u2013" || c === "\u2014") {
+    if (c === "-" || c === "–" || c === "—") {
       tokens.push({ t: "hyphen", v: "-" }); i++; continue;
     }
     // All apostrophe variants normalize to standard apostrophe
-    if ("'\u2019\u2018\u02BC\u0060\u02BB\u2032".includes(c)) {
+    if ("'’‘ʼ`ʻ′".includes(c)) {
       tokens.push({ t: "apostrophe", v: "'" }); i++; continue;
     }
     if (KNOWN_PUNCT.has(c)) {
@@ -904,11 +870,9 @@ function tokenize(raw) {
   }
   return tokens;
 }
-
 // ═══════════════════════════════════════════════════════════
 //  BRACKET PAIRING
 // ═══════════════════════════════════════════════════════════
-
 const OPEN_CLOSE = { "(": ")", "[": "]", "{": "}" };
 const CLOSE_OPEN = { ")": "(", "]": "[", "}": "{" };
 const BNAMES = {
@@ -916,16 +880,13 @@ const BNAMES = {
   "[": "bracket",     "]": "bracket",
   "{": "curly-bracket", "}": "curly-bracket"
 };
-
 function labelBrackets(tokens) {
   const result = tokens.map((tk, idx) => ({ ...tk, idx, paired: false, pairIdx: -1 }));
   const stack = { "(": [], "[": [], "{": [] };
-
   for (let i = 0; i < result.length; i++) {
     const tk = result[i];
     if (tk.t !== "punct") continue;
     const ch = tk.ch;
-
     if (ch in OPEN_CLOSE) {
       // Push this token index once per bracket in the run
       for (let p = 0; p < tk.count; p++) stack[ch].push(i);
@@ -950,36 +911,89 @@ function labelBrackets(tokens) {
   }
   return result;
 }
-
+// ═══════════════════════════════════════════════════════════
+//  VON BAEYER DESCRIPTOR DETECTION
+//  A "(" or "[" immediately preceded by a word ending in "cyclo" opens a
+//  structural ring-fusion descriptor (bicyclo, tricyclo, tetracyclo,
+//  trioxatetracyclo, ...). Everything up to its matching close is
+//  nomenclatural notation: the brackets and internal periods/commas are
+//  silent separators (already true generally in this tool), and each
+//  digit run inside is a spoken quantity, not a string of independent
+//  digits — so it should use word form only, not "both forms".
+//  A digit run starting with "0" (e.g. the "02,7" that plain text produces
+//  from a lost superscript "0^{2,7}") is deliberately left alone: that's
+//  an ambiguous case the tokenizer can't safely resolve, so it keeps the
+//  existing conservative digit-by-digit fallback instead of guessing.
+// ═══════════════════════════════════════════════════════════
+function markVonBaeyerDescriptors(tokens) {
+  const n = tokens.length;
+  const result = tokens.map(tk => ({ ...tk }));
+  const stacks = { "(": [], "[": [] };
+  const spans = [];
+  for (let i = 0; i < n; i++) {
+    const tk = tokens[i];
+    if (tk.t !== "punct") continue;
+    if (tk.ch === "(" || tk.ch === "[") {
+      for (let p = 0; p < tk.count; p++) stacks[tk.ch].push(i);
+    } else if (tk.ch === ")" || tk.ch === "]") {
+      const opener = tk.ch === ")" ? "(" : "[";
+      for (let p = 0; p < tk.count; p++) {
+        if (stacks[opener].length > 0) {
+          const oi = stacks[opener].pop();
+          spans.push({ open: oi, close: i });
+        }
+      }
+    }
+  }
+  for (const { open, close } of spans) {
+    let j = open - 1;
+    let word = "";
+    while (j >= 0 && tokens[j].t === "letter") { word = tokens[j].v + word; j--; }
+    if (!VON_BAEYER_SUFFIX_RE.test(word)) continue;
+    for (let k = open + 1; k < close; k++) {
+      if (tokens[k].t !== "digit-run") continue;
+      // A digit run touching a comma is a secondary-bridge superscript locant
+      // (e.g. the "2,6" / "1,11" in "...0^2,6..." or "...1^1,11..."). Plain
+      // text drops the superscript, so a run like "12" right before a comma
+      // could be the literal number 12, OR a bridge length "1" fused with a
+      // lost-superscript locant "2" that just happen to sit next to each
+      // other. That's unrecoverable from plain text — the IUPAC source
+      // confirms locants are only ever written this way — so these are left
+      // on the normal digit/word branching instead of being forced to a
+      // single reading.
+      const prevT = tokens[k - 1];
+      const nextT = tokens[k + 1];
+      const commaAdjacent =
+        (prevT && prevT.t === "punct" && prevT.ch === ",") ||
+        (nextT && nextT.t === "punct" && nextT.ch === ",");
+      if (commaAdjacent) continue;
+      result[k].vonBaeyer = true;
+    }
+  }
+  return result;
+}
 // ═══════════════════════════════════════════════════════════
 //  SEGMENT BUILDER
 //  Each segment: { alts: (string|{unreg})[], isH: bool, isMerg: bool }
 // ═══════════════════════════════════════════════════════════
-
 function buildSegments(tokens) {
   const segs = [];
   const push = (alts, isH=false, isMerg=false) => segs.push({ alts, isH, isMerg });
-
   const n = tokens.length;
-
   // Helper: does this token produce visible word content (not a pure hyphen)?
   function isWordlike(tk) {
     return tk && (tk.t === "letter" || tk.t === "digit-run" || tk.t === "currency" ||
       (tk.t === "punct" && (tk.ch === "+" || tk.ch === ":" || tk.ch === ";" ||
         "([{)]}".includes(tk.ch) && !tk.paired)));
   }
-
   for (let i = 0; i < n; i++) {
     const tk = tokens[i];
     const atStart = i === 0;
     const atEnd   = i === n - 1;
-
     if (tk.t === "letter")     { segs.push({ alts: [tk.v], altOrig: tk.vOrig, isH: false, isMerg: false }); continue; }
     if (tk.t === "apostrophe") { push(["'"]); continue; }
     if (tk.t === "unknown")    { push([{ unreg: tk.v }]); continue; }
-
     if (tk.t === "hyphen") { push(["-"], true, false); continue; }
-
     // ── Currency ──
     if (tk.t === "currency") {
       // At start/end: no surrounding hyphens (they get stripped anyway)
@@ -992,7 +1006,6 @@ function buildSegments(tokens) {
       if (needAfter)  push([""], true, false);
       continue;
     }
-
     // ── Greek ──
     if (tk.t === "greek") {
       const prev = tokens[i - 1];
@@ -1000,15 +1013,17 @@ function buildSegments(tokens) {
       if (!atStart && prev && (prev.t === "letter" || prev.t === "currency" || prev.t === "greek")) {
         push([""], true, false);
       }
-      // Produce alts based on greekMode — tagged with greekBranch for filtering
+      // Filter alts by greekMode right here, per letter, instead of trying to
+      // classify a whole assembled string afterward — a name with several
+      // independent Greek letters can't be reduced to one digit/word verdict.
       const roman    = tk.roman;
       const wordName = tk.word;
-      if (roman === wordName) {
-        // Same value either way (rare edge case) — just one alt
-        segs.push({ alts: [roman], isH: false, isMerg: false });
-      } else {
-        segs.push({ alts: [roman, wordName], isH: false, isMerg: false, greekBranch: true });
-      }
+      let greekAlts;
+      if (roman === wordName)      greekAlts = [roman]; // same either way (rare edge case)
+      else if (greekMode === 1)    greekAlts = [roman];
+      else if (greekMode === 2)    greekAlts = [wordName];
+      else                         greekAlts = [roman, wordName];
+      segs.push({ alts: greekAlts, isH: false, isMerg: false });
       if (!atEnd && next && (next.t === "letter" || next.t === "currency" || next.t === "greek")) {
         push([""], true, false);
       }
@@ -1020,20 +1035,37 @@ function buildSegments(tokens) {
       const hasLeadingZero = tk.v.length > 1 && tk.v[0] === "0";
       const numericValue   = parseInt(tk.v, 10);
       const overBillion    = numericValue > 1_000_000_000;
-
       // Separator before if previous token was a letter or currency
       if (!atStart && prev && (prev.t === "letter" || prev.t === "currency")) {
         push([""], true, false);
       }
-
       // Build digit-by-digit form (always present)
       const digitWords = tk.v.split("").map(digitToWord);
-
-      if (!hasLeadingZero && !overBillion && tk.v.length > 1) {
-        // Two variant slots: [digit-by-digit, full-form]
+      if (tk.vonBaeyer && !hasLeadingZero && !overBillion && tk.v.length > 1) {
+        // Von Baeyer bridge/locant count: this digit run is a single spoken
+        // quantity (e.g. "12" in tricyclo(12.4.0)... is "twelve"), so the
+        // digit-by-digit reading ("one-two") is never offered here — this
+        // overrides the global Number Mode setting UNLESS that setting is
+        // explicitly "digit-by-digit only", which is honored as an explicit
+        // user override.
         const fullForm = numToWords(numericValue);
         const digitForm = digitWords.join("-");
-        segs.push({ alts: [digitForm, fullForm], isH: false, isMerg: false, numBranch: true });
+        const alts = numMode === 2 ? [digitForm] : [fullForm || digitForm];
+        segs.push({ alts, isH: false, isMerg: false });
+      } else if (!hasLeadingZero && !overBillion && tk.v.length > 1) {
+        // Filter alts by numMode right here, per number, instead of trying
+        // to classify a whole assembled string afterward — a name with
+        // several independent multi-digit numbers (locants, multipliers,
+        // ring sizes) can't be reduced to one digit/word verdict once you
+        // look at the assembled string; each number needs its own decision
+        // made before the cartesian product is built.
+        const fullForm = numToWords(numericValue);
+        const digitForm = digitWords.join("-");
+        let numAlts;
+        if      (numMode === 1) numAlts = [fullForm];
+        else if (numMode === 2) numAlts = [digitForm];
+        else                    numAlts = [digitForm, fullForm];
+        segs.push({ alts: numAlts, isH: false, isMerg: false });
       } else if (overBillion) {
         // Digit-by-digit only, mark that a warning is needed
         const digitForm = digitWords.join("-");
@@ -1042,46 +1074,39 @@ function buildSegments(tokens) {
         // Leading zeros or single digit — digit-by-digit only (single digit has same result both ways)
         push([digitWords.join("-")]);
       }
-
       // Separator after if next token is a letter or currency
       if (!atEnd && next && (next.t === "letter" || next.t === "currency")) {
         push([""], true, false);
       }
       continue;
     }
-
     if (tk.t !== "punct") continue;
     const ch = tk.ch;
     const count = tk.count;
-
     // ── / and \ (merging hyphens) ──
     if (ch === "/" || ch === "\\") {
       if (atStart) continue;
       push([""], true, true);
       continue;
     }
-
     // ── ~ and _ (non-merging hyphens) ──
     if (ch === "~" || ch === "_") {
       if (atStart || atEnd) continue;
       push([""], true, false);
       continue;
     }
-
     // ── Period ──
     if (ch === ".") {
       if (atStart || atEnd) continue;
       push([""], true, false);
       continue;
     }
-
     // ── Comma ──
     if (ch === ",") {
       if (atStart || atEnd) continue;
       push([""], true, false);
       continue;
     }
-
     // ── Colon ──
     if (ch === ":") {
       if (count >= 3) push(["colon-colon-colon"]);
@@ -1089,7 +1114,6 @@ function buildSegments(tokens) {
       else push([""], true, false);
       continue;
     }
-
     // ── Semicolon ──
     if (ch === ";") {
       if (count >= 2) {
@@ -1101,7 +1125,6 @@ function buildSegments(tokens) {
       }
       continue;
     }
-
     // ── Plus ──
     if (ch === "+") {
       for (let p = 0; p < count; p++) {
@@ -1113,14 +1136,12 @@ function buildSegments(tokens) {
       if (!atEnd) push([""], true, false);
       continue;
     }
-
     // ── Parentheses / Brackets / Curlies ──
     if ("([{)]}".includes(ch)) {
       const isOpener = ch in OPEN_CLOSE;
       const name = BNAMES[ch];
       const paired   = tk.pairedCount || 0;   // how many in this run were paired
       const unpaired = tk.count - paired;      // how many were not
-
       if (tk.paired) {
         // At least some are paired
         if (paired > 0) {
@@ -1151,24 +1172,18 @@ function buildSegments(tokens) {
       }
       continue;
     }
-
     // ── ! ──
     if (ch === "!") { push(["exclamation-mark","exclamation-point",""]); continue; }
-
     // ── ? ──
     if (ch === "?") { push(["question-mark",""]); continue; }
-
     // ── Everything else (unreg) ──
     push([{ unreg: ch }]);
   }
-
   return segs;
 }
-
 // ═══════════════════════════════════════════════════════════
 //  CARTESIAN PRODUCT
 // ═══════════════════════════════════════════════════════════
-
 function cartesian(segAlts) {
   let results = [[]];
   for (const alts of segAlts) {
@@ -1176,23 +1191,23 @@ function cartesian(segAlts) {
     for (const existing of results) {
       for (const alt of alts) { next.push([...existing, alt]); }
     }
-    results = next;
-    if (results.length > MAX_VARIANTS) { results = results.slice(0, MAX_VARIANTS); break; }
+    // Cap breadth here, but keep going through every remaining segment —
+    // breaking out of this loop early (the old behavior) meant any segment
+    // after the cap was hit never got appended at all, silently truncating
+    // the tail of long names instead of just narrowing which combinations survive.
+    results = next.length > MAX_VARIANTS ? next.slice(0, MAX_VARIANTS) : next;
   }
   return results;
 }
-
 // ═══════════════════════════════════════════════════════════
 //  HYPHEN MERGING + STRING ASSEMBLY
 // ═══════════════════════════════════════════════════════════
-
 function assembleCombo(combo, segs) {
   // Tag every position as one of:
   //   { kind:"text",  val:string }          — literal output (letters, words, apostrophe)
   //   { kind:"expH",  count:number }        — explicit hyphen(s) from original input "-"
   //   { kind:"genH"  }                      — generated hyphen (normalization produced it)
   //   { kind:"mergH" }                      — merging generated hyphen (/ \)
-
   const tagged = combo.map((val, i) => {
     const seg = segs[i];
     if (seg.isH) {
@@ -1204,7 +1219,6 @@ function assembleCombo(combo, segs) {
     const displayVal = (preserveCase && seg.altOrig !== undefined) ? seg.altOrig : val;
     return { kind: "text", val: displayVal };
   });
-
   // Pass 1: collapse runs of hyphen tags into a single resolved hyphen string.
   // A run is a maximal consecutive sequence of expH / genH / mergH tags.
   // Rules within a run:
@@ -1214,20 +1228,16 @@ function assembleCombo(combo, segs) {
   //   - If E > 0: total hyphens = E + M  (genH absorbed by existing explicit)
   //   - If E = 0: total hyphens = M + (G ? 1 : 0), minimum 1 if any hyphen tag present
   // Result: E explicit hyphens written as "-", remainder as GEN_H placeholder.
-
   const GEN_H = "\x01";
   const parts  = []; // { isHyphenBlock:bool, str:string }
-
   let i = 0;
   while (i < tagged.length) {
     const t = tagged[i];
-
     if (t.kind === "text") {
       parts.push({ isHyphenBlock: false, str: t.val });
       i++;
       continue;
     }
-
     // Collect hyphen run
     let E = 0, M = 0, G = false;
     let j = i;
@@ -1238,47 +1248,34 @@ function assembleCombo(combo, segs) {
       else if (tt.kind === "genH")  G = true;
       j++;
     }
-
     let expPart = E;
     let genPart = E > 0 ? M : M + (G ? 1 : 0);
     if (expPart === 0 && genPart === 0) genPart = 1; // at least 1 hyphen
-
     const blockStr = "-".repeat(expPart) + GEN_H.repeat(genPart);
     parts.push({ isHyphenBlock: true, str: blockStr });
     i = j;
   }
-
   // Pass 2: join parts into string
   let str = parts.map(p => p.str).join("");
-
   // Pass 3: apostrophe rule — only remove GEN_H placeholders immediately before '
   // Real explicit hyphens ("-") before "'" are preserved.
   str = str.replace(new RegExp(GEN_H + "+(?=')", "g"), "");
-
   // Pass 4: convert remaining GEN_H placeholders to real hyphens
   str = str.replace(new RegExp(GEN_H, "g"), "-");
-
   // Pass 5: strip leading/trailing hyphens (should be rare but safeguard)
   str = str.replace(/^-+/, "").replace(/-+$/, "");
-
   return str;
 }
-
 // ═══════════════════════════════════════════════════════════
 //  ASSEMBLE ALL VARIANTS
 // ═══════════════════════════════════════════════════════════
-
 function assembleVariants(segs) {
   const unregChars   = new Set();
   const overBillions = new Set();
-
-  // Find which seg indices are number-branching segments (have both digit and word form)
-  // These are segs where alts has 2 entries and one came from a digit-run with fullForm
-  // We tag them during buildSegments by adding a numBranch flag
-  const numBranchIndices   = new Set(segs.map((s,i)=>s.numBranch   ? i : -1).filter(i=>i>=0));
-  const greekBranchIndices = new Set(segs.map((s,i)=>s.greekBranch ? i : -1).filter(i=>i>=0));
-
   // Clean segs: extract unreg/overBillion markers, replace with ""
+  // (Number Mode / Greek Mode are already applied per-segment in buildSegments,
+  // so every combo produced here already respects the user's setting — no
+  // after-the-fact classification of the assembled string is needed.)
   const cleanSegs = segs.map(seg => {
     const cleanAlts = seg.alts.map(a => {
       if (typeof a === "object" && a.unreg)       { unregChars.add(a.unreg);       return ""; }
@@ -1287,68 +1284,35 @@ function assembleVariants(segs) {
     });
     return { ...seg, alts: [...new Set(cleanAlts)] };
   });
-
   const segAlts = cleanSegs.map(s => s.alts);
   const combos  = cartesian(segAlts);
   const capped  = combos.length >= MAX_VARIANTS;
-
   const seen     = new Set();
-  const variants = []; // { text, numType: "digit"|"word"|"none" }
-
+  const variants = []; // { text }
   for (const combo of combos) {
     const str = assembleCombo(combo, cleanSegs);
     if (str.length === 0 || seen.has(str)) continue;
     seen.add(str);
-
-    // Determine numType
-    let numType = "none";
-    for (const idx of numBranchIndices) {
-      if (idx >= combo.length) continue;
-      const val = combo[idx]; const seg = cleanSegs[idx];
-      if (seg.alts.length >= 2) {
-        const ci = seg.alts.indexOf(val);
-        if (ci === 0) { numType = "digit"; break; }
-        if (ci === 1) { numType = "word";  break; }
-      }
-    }
-
-    // Determine greekType
-    let greekType = "none";
-    for (const idx of greekBranchIndices) {
-      if (idx >= combo.length) continue;
-      const val = combo[idx]; const seg = cleanSegs[idx];
-      if (seg.alts.length >= 2) {
-        const ci = seg.alts.indexOf(val);
-        if (ci === 0) { greekType = "roman"; break; }
-        if (ci === 1) { greekType = "word";  break; }
-      }
-    }
-
-    variants.push({ text: str, numType, greekType });
+    variants.push({ text: str });
   }
-
   return { variants, unregChars: [...unregChars], overBillions: [...overBillions], capped };
 }
-
 // ═══════════════════════════════════════════════════════════
 //  NORMALIZE WORD
 // ═══════════════════════════════════════════════════════════
-
 function normalizeWord(raw) {
   const tokens  = tokenize(raw);
   const labeled = labelBrackets(tokens);
-  const segs    = buildSegments(labeled);
+  const vbMarked = markVonBaeyerDescriptors(labeled);
+  const segs    = buildSegments(vbMarked);
   const { variants, unregChars, overBillions, capped } = assembleVariants(segs);
-
   const overrides     = getOverrides();
   const extras        = overrides[raw] || [];
   const extraVariants = extras
     .filter(e => !variants.some(v => v.text === e))
-    .map(e => ({ text: e, numType: "none", custom: true }));
-
+    .map(e => ({ text: e, custom: true }));
   return { variants, extraVariants, unregChars, overBillions, capped };
 }
-
 function normalizeTitleWord(prefix, wordRaw) {
   const { variants, extraVariants, unregChars, overBillions, capped } = normalizeWord(wordRaw);
   return {
@@ -1359,32 +1323,24 @@ function normalizeTitleWord(prefix, wordRaw) {
     capped,
   };
 }
-
 // ═══════════════════════════════════════════════════════════
 //  ENTRY POINT
 // ═══════════════════════════════════════════════════════════
-
 function normalizeText() {
   const raw = document.getElementById("input").value;
   const parsed = parseInput(raw);
-
   document.getElementById("outputCard").style.display = "none";
   document.getElementById("warnCard").style.display   = "none";
   document.getElementById("copyBtn").style.display    = "none";
-
   if (!parsed.valid) { showInvalid(parsed.reason); return; }
-
   const result = parsed.prefix
     ? normalizeTitleWord(parsed.prefix, parsed.word)
     : normalizeWord(parsed.word);
-
   showOutput(result);
 }
-
 // ═══════════════════════════════════════════════════════════
 //  RENDER
 // ═══════════════════════════════════════════════════════════
-
 function showInvalid(reason) {
   const card = document.getElementById("warnCard");
   card.className = "warn-card invalid";
@@ -1404,29 +1360,18 @@ function showInvalid(reason) {
     → Message <strong style="color:var(--accent2)">${DISCORD_USER}</strong>
   `;
 }
-
 function showOutput({ variants, extraVariants, unregChars, overBillions, capped }) {
-  // Filter variants by current number mode
-  const filtered = variants.filter(v => {
-    // Number filter
-    if (numMode === 1 && v.numType === "digit") return false;
-    if (numMode === 2 && v.numType === "word")  return false;
-    // Greek filter
-    if (greekMode === 1 && v.greekType === "word")  return false;
-    if (greekMode === 2 && v.greekType === "roman") return false;
-    return true;
-  });
-
+  // Number Mode and Greek Mode are already applied per-number/per-letter
+  // while segments are built, so every entry in `variants` already respects
+  // the current setting — no further filtering needed here.
   const all = [
-    ...filtered.map(v => ({ v: v.text, custom: false })),
+    ...variants.map(v => ({ v: v.text, custom: false })),
     ...extraVariants.map(v => ({ v: v.text, custom: true })),
   ];
-
   const card = document.getElementById("outputCard");
   card.style.display = "block";
   document.getElementById("variantPill").textContent =
     all.length === 1 ? "1 variant" : `${all.length} variants`;
-
   let html = "";
   all.forEach(({ v, custom }, i) => {
     const empty = !v;
@@ -1439,7 +1384,6 @@ function showOutput({ variants, extraVariants, unregChars, overBillions, capped 
     </div>`;
   });
   document.getElementById("outputBody").innerHTML = html;
-
   const capEl = document.getElementById("capWarn");
   if (capped) {
     capEl.style.display = "block";
@@ -1447,23 +1391,18 @@ function showOutput({ variants, extraVariants, unregChars, overBillions, capped 
   } else {
     capEl.style.display = "none";
   }
-
   if (all.length > 0) document.getElementById("copyBtn").style.display = "inline-block";
-
   if (unregChars.length > 0 || overBillions.length > 0) {
     const warnCard = document.getElementById("warnCard");
     warnCard.className    = "warn-card";
     warnCard.style.display = "block";
     document.getElementById("warnTitle").className   = "warn-title";
-
     let titleText = [];
     if (unregChars.length > 0)  titleText.push("Unregistered characters");
     if (overBillions.length > 0) titleText.push("Extreme number");
     document.getElementById("warnTitle").textContent = titleText.join(" · ");
-
     document.getElementById("unregChars").innerHTML =
       unregChars.map(c => `<span class="unreg-chip">${c}</span>`).join("");
-
     let bodyHtml = "";
     if (overBillions.length > 0) {
       bodyHtml += `<div style="margin-bottom:10px;color:var(--warn)">
@@ -1482,11 +1421,9 @@ function showOutput({ variants, extraVariants, unregChars, overBillions, capped 
     document.getElementById("warnBody").innerHTML = bodyHtml;
   }
 }
-
 // ═══════════════════════════════════════════════════════════
 //  UI HELPERS
 // ═══════════════════════════════════════════════════════════
-
 function copyOutput() {
   const texts = [...document.querySelectorAll(".v-text:not(.omit)")]
     .map(el => el.textContent.trim()).filter(Boolean);
@@ -1496,7 +1433,6 @@ function copyOutput() {
     setTimeout(() => btn.textContent = "Copy all", 1500);
   });
 }
-
 function clearAll() {
   document.getElementById("input").value = "";
   document.getElementById("outputCard").style.display = "none";
@@ -1504,26 +1440,22 @@ function clearAll() {
   document.getElementById("copyBtn").style.display    = "none";
   updateCount();
 }
-
 function updateCount() {
   const len = document.getElementById("input").value.length;
   document.getElementById("charCount").textContent = `${len} char${len !== 1 ? "s" : ""}`;
 }
-
 function toggleRef(id, toggleEl) {
   const list  = document.getElementById(id);
   const arrow = toggleEl.querySelector(".ref-toggle-arrow");
   const open  = list.classList.toggle("open");
   arrow.classList.toggle("open", open);
 }
-
 function toggleInfo() {
   const body  = document.getElementById("infoBody");
   const arrow = document.getElementById("infoArrow");
   const open  = body.classList.toggle("open");
   arrow.textContent = open ? "▼" : "▶";
 }
-
 document.getElementById("input").addEventListener("input", updateCount);
 document.getElementById("input").addEventListener("keydown", e => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); normalizeText(); }
@@ -1531,7 +1463,6 @@ document.getElementById("input").addEventListener("keydown", e => {
 document.getElementById("normalizeBtn").addEventListener("click", normalizeText);
 document.getElementById("clearBtn").addEventListener("click", clearAll);
 document.getElementById("copyBtn").addEventListener("click", copyOutput);
-
 renderOverrides();
 updateCount();
 </script>
